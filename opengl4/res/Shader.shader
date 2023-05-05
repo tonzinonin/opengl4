@@ -20,9 +20,9 @@ void main()
 out vec4 color;
 in vec3 ourColor;
 
-uniform vec3 dy;
+uniform vec4 dy;
 
 void main()
 {
-	color = vec4(dy * ourColor, 1.0);
+	color = dy * vec4(ourColor, 1.0);
 }
