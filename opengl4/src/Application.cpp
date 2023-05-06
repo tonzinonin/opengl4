@@ -12,6 +12,9 @@
 #include "VertexBufferLayout.h"
 #include "Shader.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 int main(void)
 {
 	GLFWwindow* window;
@@ -42,10 +45,10 @@ int main(void)
 
 
 	float positions[] = {
-		-0.5f,-0.5, 0. , 0 , 1.0 , 1.0 , //0
-		 0.5f, 0.5, 0. , 1.0 , 1.0 , 0 ,//1
-		-0.5f, 0.5, 0. , 1.0 , 0 , 1.0 ,//2
-		 0.5f,-0.5, 0. , 0 , 1.0 , 0 //3
+		-0.5f,-0.5, 0. , 0.75 , 0 , 0 , //0
+		 0.5f, 0.5, 0. , 0.25 , 0.5 , 0 ,//1
+		-0.5f, 0.5, 0. , 0 , 0.5 , 0.25 ,//2
+		 0.5f,-0.5, 0. , 0 , 0 , 0.75 //3
 	};
 
 	unsigned int indices[] = {
@@ -68,7 +71,9 @@ int main(void)
 	
 	Shader shader("res/Shader.shader");
 	shader.Bind();
-	shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
+	shader.SetUniform4f("dy", 0.8f, 0.3f, 0.8f, 1.0f);
+
+	Renderer renderer;
 
 	float r = 0.0f;
 	float increment = 0.05f;
@@ -77,28 +82,16 @@ int main(void)
 	shader.Unbind();
 	vb.Unbind();
 
-	//GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));//Ïß¿òÄ£Ê½
-
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
 		/* Render here */
 		GLCall(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
-		GLCall(glClear(GL_COLOR_BUFFER_BIT));
+		renderer.Clear();
 
 		shader.Bind();
 
-		float timeValue = glfwGetTime();
-		float dv1 = sin(timeValue) / 2.0f + 0.5f;
-		float dv2 = cos(timeValue) / 2.0f + 0.5f;
-		float dv3 = -sin(timeValue) / 2.0f + 0.5f;
-		std::cout << dv1 << std::endl;
-		shader.SetUniform4f("dy", dv1, dv2, dv3, 1.0f);
-
-		va.Bind();
-		ib.Bind();
-
-		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+		renderer.Draw(va, ib, shader, static_cast<float>(glfwGetTime()));
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);

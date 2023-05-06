@@ -22,11 +22,11 @@ public:
 	void Bind() const;
 	void Unbind() const;
 
-	void SetUniform4f(const std::string& name, float v0, float v1, float v4, float v3);
+	void SetUniform4f(const std::string& name, float v0, float v1, float v4, float v3) const;
 
 private:
-	unsigned int GetUniformLocation(const std::string& name);
+	unsigned int GetUniformLocation(const std::string& name) const;
 	ShaderProgramSource ParseShader(const std::string& filepath) const;
-	unsigned int CompileShader(unsigned int type, const std::string& source) const; 
+	unsigned int CompileShader(unsigned int type, const std::string& source); 
 	unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
 };

@@ -25,4 +25,5 @@ uniform vec4 dy;
 void main()
 {
 	color = dy * vec4(ourColor, 1.0);
+	//color = dy;
 }
