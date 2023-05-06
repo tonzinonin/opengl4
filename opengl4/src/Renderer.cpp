@@ -21,14 +21,14 @@ void Renderer::Clear() const
 	GLCall(glClear(GL_COLOR_BUFFER_BIT));
 }
 
-void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader , const float& timeValue) const
+void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader , const float& timevalue) const
 {
 	shader.Bind(); 
-	float dv1 = sin(timeValue) / 2.0f + 0.5f;
-	float dv2 = sin(timeValue + 1.57) / 2.0f + 0.5f;
-	float dv3 = sin(timeValue + 3.14) / 2.0f + 0.5f;
+	float dv1 = sin(timevalue) / 2.0f + 0.5f;
+	//float dv2 = sin(timevalue + 1.57) / 2.0f + 0.5f;
+	//float dv3 = sin(timevalue + 3.14) / 2.0f + 0.5f;
 	std::cout << dv1 << std::endl;
-	shader.SetUniform4f("dy", dv1, dv2, dv3, 1.0f);
+	//shader.SetUniform4f("dy", dv1, dv2, dv3, 1.0f);
 
 	va.Bind();
 	ib.Bind();
