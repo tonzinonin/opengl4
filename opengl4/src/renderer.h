@@ -6,6 +6,7 @@
 #include "IndexBuffer.h"
 #include "Shader.h"
 #include "Texture.h"
+#include "glm/glm/gtc/matrix_transform.hpp"
 
 #define  ASSERT(x) if (!(x))   __debugbreak();
 
@@ -23,5 +24,7 @@ class Renderer
 {
 public:
 	void Clear() const;
-	void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader , const Texture& texture0, const Texture& texture1, const int& isAddColor , const float& input) const;
+	void MVPTrans(const unsigned int width , const unsigned int height, const Shader& shader) const;
+	void Mix(const int& isAddColor, const float& input, const Shader& shader) const;
+	void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader , const Texture& texture0, const Texture& texture1) const;
 };

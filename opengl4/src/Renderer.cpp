@@ -1,6 +1,7 @@
 #include "Renderer.h"
 #include <iostream>//处理类抽象
 #include <GLFW/glfw3.h>
+
 #include "glm/glm/glm.hpp"
 #include "glm/glm/gtc/matrix_transform.hpp"
 
@@ -24,23 +25,28 @@ void Renderer::Clear() const
 	GLCall(glClear(GL_COLOR_BUFFER_BIT));
 }
 
-void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader , const Texture& texture0, const Texture& texture1 ,
-	const int& isAddColor , const float& input) const
+void Renderer::MVPTrans(const unsigned int width, const unsigned int height, const Shader& shader) const
 {
-	shader.Bind(); 
+	shader.Bind();
 
-	glActiveTexture(GL_TEXTURE0);
-	texture0.Bind(0);
-	glActiveTexture(GL_TEXTURE1);
-	texture1.Bind(1);
-	
-	glm::mat4 trans = glm::mat4(1.0f);
-	trans = glm::scale(trans, glm::vec3(0.75f, 1.0f, 1.0f));
-	trans = glm::rotate(trans, float(glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
-	trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::mat4 view = glm::mat4(1.0f);
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	glm::mat4 projection = glm::mat4(1.0f);
+	projection = glm::perspective(glm::radians(45.0f), float(width) / float(height), 0.1f, 100.0f);
 
-	shader.SetUniformMat4f("transform", trans);
+	glm::mat4 result = glm::mat4(1.0f);
+	result = projection * view * model;
 
+	shader.SetUniformMat4f("transform", result);
+
+	shader.Unbind();
+}
+
+void Renderer::Mix(const int& isAddColor, const float& input, const Shader& shader) const
+{
+	shader.Bind();
 	if (isAddColor)
 	{
 		float timevalue = glfwGetTime();
@@ -52,9 +58,19 @@ void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& 
 		shader.SetUniform4f("u_Color", dv1, dv2, dv3, 1.0f);
 	}
 	shader.SetUniform1f("mixval", input);
+	shader.Unbind();
+}
 
+void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader , const Texture& texture0, const Texture& texture1) const
+{
+	shader.Bind();
 	va.Bind();
 	ib.Bind();
+
+	glActiveTexture(GL_TEXTURE0);
+	texture0.Bind(0);
+	glActiveTexture(GL_TEXTURE1);
+	texture1.Bind(1);
 
 	GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount() , GL_UNSIGNED_INT, nullptr));
 }

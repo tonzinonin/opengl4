@@ -25,6 +25,9 @@ void processInput(GLFWwindow* window);
 
 float mixValue = 0.2;
 
+#define SCREEN_WIDTH 640
+#define SCREEM_HEIGHT 480
+
 int main(void)
 {
 	/* Initialize the library */
@@ -77,11 +80,8 @@ int main(void)
 
 	VertexBufferLayout layout;
 	layout.Push<float>(3);
-	std::cout << layout.GetStride() << std::endl;
 	layout.Push<float>(3);
-	std::cout << layout.GetStride() << std::endl;
 	layout.Push<float>(2);
-	std::cout << layout.GetStride() << std::endl;
 	va.AddBuffer(vb, layout);
 
 	const IndexBuffer ib(indices, 6);
@@ -119,7 +119,9 @@ int main(void)
 		/* Render here */
 		renderer.Clear();
 
-		renderer.Draw(va, ib, shader, texture0 , texture1 , false , mixValue);
+		renderer.MVPTrans(SCREEN_WIDTH, SCREEM_HEIGHT, shader);
+		renderer.Mix(false, mixValue, shader);
+		renderer.Draw(va, ib, shader, texture0 , texture1);
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
