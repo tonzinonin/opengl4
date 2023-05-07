@@ -25,12 +25,13 @@ void Renderer::Clear() const
 	GLCall(glClear(GL_COLOR_BUFFER_BIT));
 }
 
-void Renderer::MVPTrans(const unsigned int width, const unsigned int height, const Shader& shader) const
+void Renderer::MVPTrans(const unsigned int width, const unsigned int height, const Shader& shader, const glm::vec3& translate) const
 {
 	shader.Bind();
 
 	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::translate(model, translate);
+	model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 	glm::mat4 view = glm::mat4(1.0f);
 	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 	glm::mat4 projection = glm::mat4(1.0f);
@@ -61,16 +62,29 @@ void Renderer::Mix(const int& isAddColor, const float& input, const Shader& shad
 	shader.Unbind();
 }
 
-void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader , const Texture& texture0, const Texture& texture1) const
+void Renderer::DrawCube(const VertexArray& va, const Shader& shader , const Texture& texture0, const Texture& texture1) const
 {
 	shader.Bind();
 	va.Bind();
-	ib.Bind();
 
 	glActiveTexture(GL_TEXTURE0);
 	texture0.Bind(0);
 	glActiveTexture(GL_TEXTURE1);
 	texture1.Bind(1);
 
-	GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount() , GL_UNSIGNED_INT, nullptr));
+	GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
+}
+
+void Renderer::Draw(const VertexArray& va, const Shader& shader, const Texture& texture0, const Texture& texture1, const IndexBuffer& id) const
+{
+	shader.Bind();
+	va.Bind();
+	id.Bind();
+
+	glActiveTexture(GL_TEXTURE0);
+	texture0.Bind(0);
+	glActiveTexture(GL_TEXTURE1);
+	texture1.Bind(1);
+
+	GLCall(glDrawElements(GL_TRIANGLES, id.GetCount(), GL_UNSIGNED_INT, nullptr));
 }

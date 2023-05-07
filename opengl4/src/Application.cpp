@@ -15,9 +15,11 @@
 #include "Shader.h"
 
 #include "stb_image/stb_image.h"
+
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
+
 #include "glm/glm/glm.hpp"
 #include "glm/glm/gtc/matrix_transform.hpp"
 
@@ -40,7 +42,7 @@ int main(void)
 
 
 	/* Create a Windowed mode and its OpenGL context */
-	GLFWwindow* window = glfwCreateWindow(640,480, "Hello World", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(640,480, "cube", nullptr, nullptr);
 	if (!window)
 	{
 		GLCall(glfwTerminate())
@@ -56,16 +58,48 @@ int main(void)
 		std::cout << "Error!" << std::endl;
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
-	constexpr float positions[] = {
-	     0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 1.0f,   -1.0f, 1.0f,   // 右上
-		 0.5f, -0.5f, 0.0f,   1.0f, 1.0f, 1.0f,   -1.0f, 0.0f,   // 右下
-		-0.5f, -0.5f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // 左下
-		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // 左上
-	};
+	float positions[] = {
+	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
-	const unsigned int indices[] = {
-		0, 1, 2,
-		2, 3, 0
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
 
 	//GLCall(glEnable(GL_BLEND))
@@ -80,17 +114,14 @@ int main(void)
 
 	VertexBufferLayout layout;
 	layout.Push<float>(3);
-	layout.Push<float>(3);
 	layout.Push<float>(2);
 	va.AddBuffer(vb, layout);
 
-	const IndexBuffer ib(indices, 6);
-
-	Shader shader("res/shader/Shader.shader");
+	Shader shader("res/shader/Cube.shader");
 
 	const Texture texture0("res/textures/container.jpg");
 	texture0.Bind();
-	const Texture texture1("res/textures/awesomeface.png");
+	const Texture texture1("res/textures/lambda.png");
 	texture1.Bind();
 
 	shader.Bind();
@@ -101,38 +132,56 @@ int main(void)
 	va.Unbind();
 	shader.Unbind();
 	vb.Unbind();
-	ib.Unbind();
 
 	Renderer renderer;
 
-	//ImGui::CreateContext();
-	//ImGui_ImplGlfw_InitForOpenGL(window, true);
+	glEnable(GL_DEPTH_TEST);
+
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	//ImGui::StyleColorsDark();
 
-	//const char* glsl_version = "#version 330";
-	//ImGui_ImplOpenGL3_Init(glsl_version);
+	const char* glsl_version = "#version 330";
+	ImGui_ImplOpenGL3_Init(glsl_version);
 
-	/* Loop until the user closes the window */
+	glm::vec3 translation(0, 0, 0);
+
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
-		/* Render here */
 		renderer.Clear();
 
-		renderer.MVPTrans(SCREEN_WIDTH, SCREEM_HEIGHT, shader);
+		renderer.MVPTrans(SCREEN_WIDTH, SCREEM_HEIGHT, shader , translation);
 		renderer.Mix(false, mixValue, shader);
-		renderer.Draw(va, ib, shader, texture0 , texture1);
+		renderer.DrawCube(va, shader, texture0 , texture1);
+
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+		{
+			ImGui::Begin("ImGui");
+			ImGui::SliderFloat3("Translation", &translation.x, -1.0f, 1.0f);
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::End();
+		}
+		//// 创建 GUI 元素
+		ImGui::Render(); 
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		//// 渲染 GUI
+		ImGui::Render();
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
 
 		/* Poll for and events */
 		glfwPollEvents();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	//ImGui_ImplOpenGL3_Shutdown();
-	//ImGui_ImplGlfw_Shutdown();
-	//ImGui::DestroyContext();
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	glfwDestroyWindow(window);
 
