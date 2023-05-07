@@ -15,6 +15,11 @@
 #include "Shader.h"
 
 #include "stb_image/stb_image.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+#include "glm/glm/glm.hpp"
+#include "glm/glm/gtc/matrix_transform.hpp"
 
 void processInput(GLFWwindow* window);
 
@@ -32,7 +37,7 @@ int main(void)
 
 
 	/* Create a Windowed mode and its OpenGL context */
-	GLFWwindow* window = glfwCreateWindow(640, 480, "Hello World", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(640,480, "Hello World", nullptr, nullptr);
 	if (!window)
 	{
 		GLCall(glfwTerminate())
@@ -49,10 +54,10 @@ int main(void)
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
 	constexpr float positions[] = {
-	     0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 1.0f,   -2.0f, 2.0f,   // 右上
-		 0.5f, -0.5f, 0.0f,   1.0f, 1.0f, 1.0f,   -2.0f, 0.0f,   // 右下
+	     0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 1.0f,   -1.0f, 1.0f,   // 右上
+		 0.5f, -0.5f, 0.0f,   1.0f, 1.0f, 1.0f,   -1.0f, 0.0f,   // 右下
 		-0.5f, -0.5f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // 左下
-		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 2.0f    // 左上
+		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // 左上
 	};
 
 	const unsigned int indices[] = {
@@ -100,6 +105,13 @@ int main(void)
 
 	Renderer renderer;
 
+	//ImGui::CreateContext();
+	//ImGui_ImplGlfw_InitForOpenGL(window, true);
+	//ImGui::StyleColorsDark();
+
+	//const char* glsl_version = "#version 330";
+	//ImGui_ImplOpenGL3_Init(glsl_version);
+
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
@@ -107,7 +119,7 @@ int main(void)
 		/* Render here */
 		renderer.Clear();
 
-		renderer.Draw(va, ib, shader, texture0 , texture1 , true , mixValue);
+		renderer.Draw(va, ib, shader, texture0 , texture1 , false , mixValue);
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
@@ -115,6 +127,12 @@ int main(void)
 		/* Poll for and events */
 		glfwPollEvents();
 	}
+
+	//ImGui_ImplOpenGL3_Shutdown();
+	//ImGui_ImplGlfw_Shutdown();
+	//ImGui::DestroyContext();
+
+	glfwDestroyWindow(window);
 
 	glfwTerminate();
 	return 0;

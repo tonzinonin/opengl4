@@ -1,6 +1,8 @@
 #include "Renderer.h"
 #include <iostream>//处理类抽象
 #include <GLFW/glfw3.h>
+#include "glm/glm/glm.hpp"
+#include "glm/glm/gtc/matrix_transform.hpp"
 
 void GLClearError()
 {
@@ -32,6 +34,12 @@ void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& 
 	glActiveTexture(GL_TEXTURE1);
 	texture1.Bind(1);
 	
+	glm::mat4 trans = glm::mat4(1.0f);
+	trans = glm::scale(trans, glm::vec3(0.75f, 1.0f, 1.0f));
+	trans = glm::rotate(trans, float(glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
+	trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+
+	shader.SetUniformMat4f("transform", trans);
 
 	if (isAddColor)
 	{
@@ -42,8 +50,8 @@ void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& 
 		std::cout << dv1 << std::endl;
 		shader.SetUniform1i("isColor", 1);
 		shader.SetUniform4f("u_Color", dv1, dv2, dv3, 1.0f);
-		shader.SetUniform1f("mixval", input);
 	}
+	shader.SetUniform1f("mixval", input);
 
 	va.Bind();
 	ib.Bind();

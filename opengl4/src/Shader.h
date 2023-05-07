@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "glm/glm/glm.hpp"
 struct ShaderProgramSource
 {
 	std::string VertexSource;
@@ -25,6 +26,7 @@ public:
 	void SetUniform4f(const std::string& name, float v0, float v1, float v4, float v3) const;
 	void SetUniform1i(const std::string& name, int v0) const;
 	void SetUniform1f(const std::string& name, float value) const;
+	void SetUniformMat4f(const std::string& name, const glm::mat4& matrix) const;
 
 private:
 	unsigned int GetUniformLocation(const std::string& name) const;
