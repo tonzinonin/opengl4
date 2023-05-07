@@ -14,6 +14,12 @@
 #include "Texture.h"
 #include "Shader.h"
 
+#include "stb_image/stb_image.h"
+
+void processInput(GLFWwindow* window);
+
+float mixValue = 0.2;
+
 int main(void)
 {
 	/* Initialize the library */
@@ -43,10 +49,10 @@ int main(void)
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
 	constexpr float positions[] = {
-		-0.5f, -0.5f, 0.0f, 0.0f,	// 0
-		 0.5f, -0.5f, 1.0f, 0.0f,	// 1
-		 0.5f,  0.5f, 1.0f, 1.0f,	// 2
-		-0.5f,  0.5f, 0.0f, 1.0f	// 3
+	     0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 1.0f,   -2.0f, 2.0f,   // 右上
+		 0.5f, -0.5f, 0.0f,   1.0f, 1.0f, 1.0f,   -2.0f, 0.0f,   // 右下
+		-0.5f, -0.5f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // 左下
+		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 2.0f    // 左上
 	};
 
 	const unsigned int indices[] = {
@@ -54,31 +60,38 @@ int main(void)
 		2, 3, 0
 	};
 
-	GLCall(glEnable(GL_BLEND))
-	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))
+	//GLCall(glEnable(GL_BLEND))
+	//GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))//开启混合
 
 	unsigned int vao;
 	GLCall(glGenVertexArrays(1, &vao))
 	GLCall(glBindVertexArray(vao))
 
 	VertexArray va;
-	const VertexBuffer vb(positions, static_cast<unsigned long long>(4) * 4 * sizeof(float));
+	const VertexBuffer vb(positions,sizeof(positions));
 
 	VertexBufferLayout layout;
+	layout.Push<float>(3);
+	std::cout << layout.GetStride() << std::endl;
+	layout.Push<float>(3);
+	std::cout << layout.GetStride() << std::endl;
 	layout.Push<float>(2);
-	layout.Push<float>(2);
+	std::cout << layout.GetStride() << std::endl;
 	va.AddBuffer(vb, layout);
 
 	const IndexBuffer ib(indices, 6);
 
 	Shader shader("res/shader/Shader.shader");
+
+	const Texture texture0("res/textures/container.jpg");
+	texture0.Bind();
+	const Texture texture1("res/textures/awesomeface.png");
+	texture1.Bind();
+
 	shader.Bind();
-	//shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
 
-	const Texture texture("res/textures/container.jpg");
-	texture.Bind();
-	shader.SetUniform1i("u_Texture", 0);
-
+	shader.SetUniform1i("texture0", 0);
+	shader.SetUniform1i("texture1", 1);
 
 	va.Unbind();
 	shader.Unbind();
@@ -90,12 +103,11 @@ int main(void)
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
+		processInput(window);
 		/* Render here */
 		renderer.Clear();
 
-		shader.Bind();
-		float timevalue = glfwGetTime();
-		renderer.Draw(va, ib, shader , timevalue);
+		renderer.Draw(va, ib, shader, texture0 , texture1 , true , mixValue);
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
@@ -106,4 +118,18 @@ int main(void)
 
 	glfwTerminate();
 	return 0;
+}
+void processInput(GLFWwindow* window)
+{
+
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	{
+		mixValue += 0.01;
+		if (mixValue >= 1.00) mixValue = 1.00;
+	}
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	{
+		mixValue -= 0.01;
+		if (mixValue <= 0.00) mixValue = 0.00;
+	}
 }

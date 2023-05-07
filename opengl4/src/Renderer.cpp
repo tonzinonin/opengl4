@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include <iostream>//处理类抽象
+#include <GLFW/glfw3.h>
 
 void GLClearError()
 {
@@ -21,17 +22,31 @@ void Renderer::Clear() const
 	GLCall(glClear(GL_COLOR_BUFFER_BIT));
 }
 
-void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader , const float& timevalue) const
+void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader , const Texture& texture0, const Texture& texture1 ,
+	const int& isAddColor , const float& input) const
 {
 	shader.Bind(); 
-	float dv1 = sin(timevalue) / 2.0f + 0.5f;
-	//float dv2 = sin(timevalue + 1.57) / 2.0f + 0.5f;
-	//float dv3 = sin(timevalue + 3.14) / 2.0f + 0.5f;
-	std::cout << dv1 << std::endl;
-	//shader.SetUniform4f("dy", dv1, dv2, dv3, 1.0f);
+
+	glActiveTexture(GL_TEXTURE0);
+	texture0.Bind(0);
+	glActiveTexture(GL_TEXTURE1);
+	texture1.Bind(1);
+	
+
+	if (isAddColor)
+	{
+		float timevalue = glfwGetTime();
+		float dv1 = sin(timevalue) / 2.0f + 0.5f;
+		float dv2 = sin(timevalue + 1.57) / 2.0f + 0.5f;
+		float dv3 = sin(timevalue + 3.14) / 2.0f + 0.5f;
+		std::cout << dv1 << std::endl;
+		shader.SetUniform1i("isColor", 1);
+		shader.SetUniform4f("u_Color", dv1, dv2, dv3, 1.0f);
+		shader.SetUniform1f("mixval", input);
+	}
 
 	va.Bind();
 	ib.Bind();
 
-	GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
+	GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount() , GL_UNSIGNED_INT, nullptr));
 }
