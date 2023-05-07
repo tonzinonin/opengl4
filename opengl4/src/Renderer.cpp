@@ -29,8 +29,13 @@ void Renderer::MVPTrans(const unsigned int width, const unsigned int height, con
 {
 	shader.Bind();
 
-	glm::mat4 view = glm::mat4(1.0f);
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	float radius = 10.0f;
+	float camX = sin(glfwGetTime()) * radius;
+	float camZ = cos(glfwGetTime()) * radius;
+	glm::mat4 view = glm::mat4(0.0);
+	view = glm::lookAt(glm::vec3(camX, 0.0, camZ),
+		glm::vec3(0.0, 0.0, 0.0),
+		glm::vec3(0.0, 1.0, 0.0));
 	glm::mat4 projection = glm::mat4(1.0f);
 	projection = glm::perspective(glm::radians(45.0f), float(width) / float(height), 0.1f, 100.0f);
 	shader.SetUniformMat4f("projection", projection);
@@ -48,7 +53,6 @@ void Renderer::Mix(const int& isAddColor, const float& input, const Shader& shad
 		float dv1 = sin(timevalue) / 2.0f + 0.5f;
 		float dv2 = sin(timevalue + 1.57) / 2.0f + 0.5f;
 		float dv3 = sin(timevalue + 3.14) / 2.0f + 0.5f;
-		std::cout << dv1 << std::endl;
 		shader.SetUniform1i("isColor", 1);
 		shader.SetUniform4f("u_Color", dv1, dv2, dv3, 1.0f);
 	}
@@ -68,7 +72,6 @@ void Renderer::DrawCube(const VertexArray& va, const Shader& shader , const Text
 
 	for (unsigned int i = 0; i < 10; i++)
 	{
-		std::cout << i << std::endl;
 		glm::mat4 model = glm::mat4(1.0);
 		model = glm::translate(model, cubePositions[i]);	
 		model = glm::translate(model, translate);

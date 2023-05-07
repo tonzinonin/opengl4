@@ -24,11 +24,26 @@
 #include "glm/glm/gtc/matrix_transform.hpp"
 
 void processInput(GLFWwindow* window);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 float mixValue = 0.2;
 
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
+#define SCREEN_WIDTH 720
+#define SCREEN_HEIGHT 600
+#define IMGUI_WIDTH 400
+#define IMGUI_HEIGHT 200
+
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+float deltaTime = 0.0f; // 当前帧与上一帧的时间差
+float lastFrame = 0.0f; // 上一帧的时间
+float lastX , lastY , yaw , pitch , fov = 40.0f;
+bool firstMouse = true , isMouse = false;
+
 
 int main(void)
 {
@@ -114,8 +129,14 @@ int main(void)
 		glm::vec3(1.5f,  0.2f, -1.5f),
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
+
 	//GLCall(glEnable(GL_BLEND))
 	//GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))//开启混合
+	glEnable(GL_DEPTH_TEST);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPosCallback(window, mouse_callback); 
+	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetKeyCallback(window, key_callback);
 
 	unsigned int vao;
 	GLCall(glGenVertexArrays(1, &vao))
@@ -147,7 +168,6 @@ int main(void)
 
 	Renderer renderer;
 
-	glEnable(GL_DEPTH_TEST);
 
 	ImGui::CreateContext();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -163,7 +183,22 @@ int main(void)
 		processInput(window);
 		renderer.Clear();
 
-		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_HEIGHT, shader );
+		shader.Bind();
+
+		float radius = 10.0f;
+		float camX = sin(glfwGetTime()) * radius;
+		float camZ = cos(glfwGetTime()) * radius;
+		glm::mat4 view = glm::mat4(0.0);
+		view = glm::lookAt(cameraPos,
+						   cameraPos + cameraFront,
+						   cameraUp  );
+		glm::mat4 projection = glm::mat4(1.0f);
+		projection = glm::perspective(glm::radians(fov), float(SCREEN_WIDTH) / float(SCREEN_WIDTH) , 0.1f, 100.0f);
+		//projection = glm::perspective(glm::radians(45.0f), float(SCREEN_WIDTH) / float(SCREEN_WIDTH), 0.1f, 100.0f);
+		shader.SetUniformMat4f("projection", projection);
+		shader.SetUniformMat4f("view", view);
+
+		shader.Unbind();
 		renderer.Mix(false, mixValue, shader);
 		renderer.DrawCube(va, shader, texture0 , texture1 , cubePositions, translation);
 
@@ -172,8 +207,15 @@ int main(void)
 		ImGui::NewFrame();
 		{
 			ImGui::Begin("ImGui");
+			ImGui::Text("LastX = %.3f", lastX);
+			ImGui::Text("Lasty = %.3f", lastY);
+			ImGui::Text("Yaw = %.3f", yaw);
+			ImGui::Text("Pitch = %.3f", pitch);
+
 			ImGui::SliderFloat3("Translation", &translation.x, -1.0f, 1.0f);
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::Text("Press R to enable/unenable cursor in window");
+			ImGui::SetWindowSize(ImVec2(IMGUI_WIDTH, IMGUI_HEIGHT));
 			ImGui::End();
 		}
 		//// 创建 GUI 元素
@@ -202,7 +244,16 @@ int main(void)
 }
 void processInput(GLFWwindow* window)
 {
+	float currentFrame = glfwGetTime();
+	deltaTime = currentFrame - lastFrame;
+	lastFrame = currentFrame;
 
+	float cameraSpeed = 2.5f * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	{
+		glfwDestroyWindow(window); 
+		glfwTerminate();
+	}
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 	{
 		mixValue += 0.01;
@@ -212,5 +263,83 @@ void processInput(GLFWwindow* window)
 	{
 		mixValue -= 0.01;
 		if (mixValue <= 0.00) mixValue = 0.00;
+	}
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		cameraPos += cameraFront * cameraSpeed;
+	}
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	{
+		cameraPos -= cameraFront * cameraSpeed;
+	}
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	{
+		cameraPos -= glm::cross(cameraUp, cameraFront) * cameraSpeed;
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	{
+		cameraPos += glm::cross(cameraUp, cameraFront) * cameraSpeed;
+	}
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+
+	float sensitivity = 0.05;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw += xoffset;
+	pitch += yoffset;
+
+	if (pitch > 89.0f)
+		pitch = 89.0f;
+	if (pitch < -89.0f)
+		pitch = -89.0f;
+
+	glm::vec3 front;
+	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	front.y = sin(glm::radians(pitch));
+	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	cameraFront = glm::normalize(front);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	if (fov >= 1.0f && fov <= 45.0f)
+		fov -= yoffset;
+	if (fov <= 1.0f)
+		fov = 1.0f;
+	if (fov >= 45.0f)
+		fov = 45.0f;
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (key == GLFW_KEY_R && action == GLFW_RELEASE)
+	{
+		if (isMouse == false)
+		{
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			isMouse = true;
+			std::cout << '!' << std::endl;
+		}
+		else
+		{
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			isMouse = false;
+			std::cout << '?' << std::endl;
+		}
 	}
 }
