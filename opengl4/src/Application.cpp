@@ -28,7 +28,7 @@ void processInput(GLFWwindow* window);
 float mixValue = 0.2;
 
 #define SCREEN_WIDTH 640
-#define SCREEM_HEIGHT 480
+#define SCREEN_HEIGHT 480
 
 int main(void)
 {
@@ -42,7 +42,7 @@ int main(void)
 
 
 	/* Create a Windowed mode and its OpenGL context */
-	GLFWwindow* window = glfwCreateWindow(640,480, "cube", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH,SCREEN_HEIGHT , "cube", nullptr, nullptr);
 	if (!window)
 	{
 		GLCall(glfwTerminate())
@@ -102,6 +102,18 @@ int main(void)
 	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
 
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
+		glm::vec3(1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
 	//GLCall(glEnable(GL_BLEND))
 	//GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))//¿ªÆô»ìºÏ
 
@@ -151,9 +163,9 @@ int main(void)
 		processInput(window);
 		renderer.Clear();
 
-		renderer.MVPTrans(SCREEN_WIDTH, SCREEM_HEIGHT, shader , translation);
+		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_HEIGHT, shader );
 		renderer.Mix(false, mixValue, shader);
-		renderer.DrawCube(va, shader, texture0 , texture1);
+		renderer.DrawCube(va, shader, texture0 , texture1 , cubePositions, translation);
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -176,7 +188,7 @@ int main(void)
 
 		/* Poll for and events */
 		glfwPollEvents();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 	}
 
 	ImGui_ImplOpenGL3_Shutdown();

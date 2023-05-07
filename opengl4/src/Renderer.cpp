@@ -22,25 +22,19 @@ bool GLLogCall(const char* function, const char* file, int line)
 
 void Renderer::Clear() const
 {
-	GLCall(glClear(GL_COLOR_BUFFER_BIT));
+	GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
-void Renderer::MVPTrans(const unsigned int width, const unsigned int height, const Shader& shader, const glm::vec3& translate) const
+void Renderer::MVPTrans(const unsigned int width, const unsigned int height, const Shader& shader) const
 {
 	shader.Bind();
 
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, translate);
-	model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 	glm::mat4 view = glm::mat4(1.0f);
 	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 	glm::mat4 projection = glm::mat4(1.0f);
 	projection = glm::perspective(glm::radians(45.0f), float(width) / float(height), 0.1f, 100.0f);
-
-	glm::mat4 result = glm::mat4(1.0f);
-	result = projection * view * model;
-
-	shader.SetUniformMat4f("transform", result);
+	shader.SetUniformMat4f("projection", projection);
+	shader.SetUniformMat4f("view", view);
 
 	shader.Unbind();
 }
@@ -62,7 +56,7 @@ void Renderer::Mix(const int& isAddColor, const float& input, const Shader& shad
 	shader.Unbind();
 }
 
-void Renderer::DrawCube(const VertexArray& va, const Shader& shader , const Texture& texture0, const Texture& texture1) const
+void Renderer::DrawCube(const VertexArray& va, const Shader& shader , const Texture& texture0, const Texture& texture1 , const glm::vec3 *cubePositions, const glm::vec3& translate) const
 {
 	shader.Bind();
 	va.Bind();
@@ -72,7 +66,17 @@ void Renderer::DrawCube(const VertexArray& va, const Shader& shader , const Text
 	glActiveTexture(GL_TEXTURE1);
 	texture1.Bind(1);
 
-	GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
+	for (unsigned int i = 0; i < 10; i++)
+	{
+		std::cout << i << std::endl;
+		glm::mat4 model = glm::mat4(1.0);
+		model = glm::translate(model, cubePositions[i]);	
+		model = glm::translate(model, translate);
+		float angle = i * 20.0;
+		model = glm::rotate(model, glm::radians(float(glfwGetTime()) * 30 + angle), glm::vec3(1.0f, 0.3f, 0.5f));
+		shader.SetUniformMat4f("model", model);
+		GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
+	}
 }
 
 void Renderer::Draw(const VertexArray& va, const Shader& shader, const Texture& texture0, const Texture& texture1, const IndexBuffer& id) const
