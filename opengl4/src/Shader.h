@@ -2,8 +2,14 @@
 
 #include <string>
 #include <unordered_map>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
+#include "GL/glew.h"
+#include "FaultChecking.h"
 #include "glm/glm/glm.hpp"
+
 struct ShaderProgramSource
 {
 	std::string VertexSource;

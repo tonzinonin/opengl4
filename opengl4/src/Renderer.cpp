@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Renderer.h"
 #include <iostream>//处理类抽象
 #include <GLFW/glfw3.h>
@@ -5,43 +7,38 @@
 #include "glm/glm/glm.hpp"
 #include "glm/glm/gtc/matrix_transform.hpp"
 
-void GLClearError()
-{
-	while (glGetError() != GL_NO_ERROR);
-}
-
-bool GLLogCall(const char* function, const char* file, int line)
-{
-	while (const GLenum error = glGetError())
-	{
-		std::cout << "[OpenGL Error] (" << error << "):" << function << " " << file << ":" << line << std::endl;
-		return false;
-	}
-	return true;
-}
-
 void Renderer::Clear() const
 {
 	GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
-void Renderer::MVPTrans(const unsigned int SCREEN_WIDTH , const unsigned int SCREEN_HEIGHT , const Shader& shader , Camera& camera ) const
+void Renderer::MVPTrans(const unsigned int SCREEN_WIDTH, const unsigned int SCREEN_HEIGHT, const Shader& shader, Camera& camera, OpenglImgui& ui, const glm::vec3* cubePositions) const
 {
 	shader.Bind();
-
+	glm::mat4 diy = 
+		glm::mat4(
+		glm::vec4(1, 0, 0, 0),
+		glm::vec4(0, 1, 0, 0),
+		glm::vec4(0, 0, 1, 0),
+		glm::vec4(0, 0, 0, 1.0)
+	);
 	float radius = 10.0f;
 	float camX = sin(glfwGetTime()) * radius;
 	float camZ = cos(glfwGetTime()) * radius;
 	glm::mat4 view = camera.GetViewMatrix();
 	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(camera.fov), float(SCREEN_WIDTH) / float(SCREEN_HEIGHT), 0.1f, 100.0f);
+	projection = glm::perspective(glm::radians(camera.fov), float(SCREEN_WIDTH) / float(SCREEN_HEIGHT), 0.1f, 100.0f); 
+
+	ui.projectionupdate(projection);
+	ui.viewupdate(view);
+
 	shader.SetUniformMat4f("projection", projection);
 	shader.SetUniformMat4f("view", view);
 
 	shader.Unbind();
 }
 
-void Renderer::Mix(const int& isAddColor, const float& input, const Shader& shader) const
+void Renderer::Mix(const int& isAddColor, const float& input, const Shader& shader ) const
 {
 	shader.Bind();
 	if (isAddColor)
@@ -57,7 +54,8 @@ void Renderer::Mix(const int& isAddColor, const float& input, const Shader& shad
 	shader.Unbind();
 }
 
-void Renderer::DrawCube(const VertexArray& va, const Shader& shader , const Texture& texture0, const Texture& texture1 , const glm::vec3 *cubePositions) const
+void Renderer::DrawCube(const VertexArray& va, const Shader& shader , const Texture& texture0, const Texture& texture1 , const glm::vec3 *cubePositions,
+	OpenglImgui& ui, unsigned int rendererNumber) const
 {
 	shader.Bind();
 	va.Bind();
@@ -67,12 +65,15 @@ void Renderer::DrawCube(const VertexArray& va, const Shader& shader , const Text
 	glActiveTexture(GL_TEXTURE1);
 	texture1.Bind(1);
 
-	for (unsigned int i = 0; i < 10; i++)
+	for (unsigned int i = 0; i < rendererNumber; i++)
 	{
 		glm::mat4 model = glm::mat4(1.0);
 		model = glm::translate(model, cubePositions[i]);	
 		float angle = i * 20.0;
 		model = glm::rotate(model, glm::radians(float(glfwGetTime()) * 30 + angle), glm::vec3(1.0f, 0.3f, 0.5f));
+
+		ui.modelupdate(model);
+
 		shader.SetUniformMat4f("model", model);
 		GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
 	}

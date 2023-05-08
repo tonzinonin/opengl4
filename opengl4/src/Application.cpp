@@ -32,7 +32,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 #define IMGUI_WIDTH 400
 #define IMGUI_HEIGHT 200
 #define ARR_SIZE 2000
- 
+
 float mixValue = 0.2;
 float deltaTime = 0.0f; // 当前帧与上一帧的时间差
 float lastFrame = 0.0f; // 上一帧的时间
@@ -69,14 +69,14 @@ int main(void)
 	vu.value(positions);
 
 	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f,  0.0f,  0.0f),
 		glm::vec3(2.0f,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
 		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
 		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(0.0f,  0.0f,  0.0f),
 		glm::vec3(-1.7f,  3.0f, -7.5f),
 		glm::vec3(1.3f, -2.0f, -2.5f),
-		glm::vec3(1.5f,  2.0f, -2.5f),
 		glm::vec3(1.5f,  0.2f, -1.5f),
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
@@ -98,7 +98,7 @@ int main(void)
 
 	const Texture texture0("res/textures/container.jpg");
 	texture0.Bind();
-	const Texture texture1("res/textures/lambda.png");
+	const Texture texture1("res/textures/awesomeface.png");
 	texture1.Bind();
 
 	shader.SetUniform1i("texture0", 0);
@@ -115,12 +115,13 @@ int main(void)
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetKeyCallback(window, key_callback);
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	//GLCall(glEnable(GL_BLEND))
 	//GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))//开启混合
 	glEnable(GL_DEPTH_TEST);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+	unsigned int rendererNumber = 2;
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -131,11 +132,11 @@ int main(void)
 		lastFrame = timeValue;
 
 		renderer.Clear();
-		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, shader, camera);
-		renderer.Mix(false, mixValue, shader);
-		renderer.DrawCube(va, shader, texture0 , texture1 , cubePositions);
+		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, shader, camera, ui , cubePositions);
+		renderer.Mix(false, mixValue, shader );
+		renderer.DrawCube(va, shader, texture0 , texture1 , cubePositions , ui , rendererNumber );
 
-		ui.Darw(IMGUI_WIDTH , IMGUI_HEIGHT , camera);
+		ui.Draw(IMGUI_WIDTH , IMGUI_HEIGHT , cubePositions, rendererNumber , camera);
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
 

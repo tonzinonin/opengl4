@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Renderer.h"
-
 #include "glm/glm/glm.hpp"
 #include "glm/glm/gtc/matrix_transform.hpp"
+
 enum Camera_Movement
 {
 	FORWARD , BACKWARD , LEFT , RIGHT
