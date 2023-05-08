@@ -25,19 +25,16 @@ void Renderer::Clear() const
 	GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
-void Renderer::MVPTrans(const unsigned int width, const unsigned int height, const Shader& shader) const
+void Renderer::MVPTrans(const unsigned int SCREEN_WIDTH , const unsigned int SCREEN_HEIGHT , const Shader& shader , Camera& camera ) const
 {
 	shader.Bind();
 
 	float radius = 10.0f;
 	float camX = sin(glfwGetTime()) * radius;
 	float camZ = cos(glfwGetTime()) * radius;
-	glm::mat4 view = glm::mat4(0.0);
-	view = glm::lookAt(glm::vec3(camX, 0.0, camZ),
-		glm::vec3(0.0, 0.0, 0.0),
-		glm::vec3(0.0, 1.0, 0.0));
+	glm::mat4 view = camera.GetViewMatrix();
 	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(45.0f), float(width) / float(height), 0.1f, 100.0f);
+	projection = glm::perspective(glm::radians(camera.fov), float(SCREEN_WIDTH) / float(SCREEN_HEIGHT), 0.1f, 100.0f);
 	shader.SetUniformMat4f("projection", projection);
 	shader.SetUniformMat4f("view", view);
 
@@ -60,7 +57,7 @@ void Renderer::Mix(const int& isAddColor, const float& input, const Shader& shad
 	shader.Unbind();
 }
 
-void Renderer::DrawCube(const VertexArray& va, const Shader& shader , const Texture& texture0, const Texture& texture1 , const glm::vec3 *cubePositions, const glm::vec3& translate) const
+void Renderer::DrawCube(const VertexArray& va, const Shader& shader , const Texture& texture0, const Texture& texture1 , const glm::vec3 *cubePositions) const
 {
 	shader.Bind();
 	va.Bind();
@@ -74,7 +71,6 @@ void Renderer::DrawCube(const VertexArray& va, const Shader& shader , const Text
 	{
 		glm::mat4 model = glm::mat4(1.0);
 		model = glm::translate(model, cubePositions[i]);	
-		model = glm::translate(model, translate);
 		float angle = i * 20.0;
 		model = glm::rotate(model, glm::radians(float(glfwGetTime()) * 30 + angle), glm::vec3(1.0f, 0.3f, 0.5f));
 		shader.SetUniformMat4f("model", model);

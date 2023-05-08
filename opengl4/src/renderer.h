@@ -7,6 +7,7 @@
 #include "IndexBuffer.h"
 #include "Shader.h"
 #include "Texture.h"
+#include "Camera.h"
 
 #include "glm/glm/glm.hpp"
 #include "glm/glm/gtc/matrix_transform.hpp"
@@ -22,13 +23,14 @@ class VertexArray;
 class IndexBuffer;
 class Shader;
 class Texture;
+class Camera;
 
 class Renderer
 {
 public:
 	void Clear() const;
-	void MVPTrans(const unsigned int width , const unsigned int height, const Shader& shader) const;
+	void MVPTrans(const unsigned int width , const unsigned int height, const Shader& shader, Camera& camera) const;
 	void Mix(const int& isAddColor, const float& input, const Shader& shader) const;
-	void DrawCube(const VertexArray& va, const Shader& shader, const Texture& texture0, const Texture& texture1 , const glm::vec3 *cubePositions, const glm::vec3& translate) const;
+	void DrawCube(const VertexArray& va, const Shader& shader, const Texture& texture0, const Texture& texture1 , const glm::vec3 *cubePositions) const;
 	void Draw(const VertexArray& va, const Shader& shader, const Texture& texture0, const Texture& texture1, const IndexBuffer& id) const;
 };
