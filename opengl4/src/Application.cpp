@@ -37,8 +37,10 @@ float mixValue = 0.2;
 float deltaTime = 0.0f; // 当前帧与上一帧的时间差
 float lastFrame = 0.0f; // 上一帧的时间
 bool isMouse = false;
-float positions[ARR_SIZE];
+float SpecularSt = 0.5;
+//float positions[ARR_SIZE];
 
+glm::vec3 translate = glm::vec3(0., 0., 0.);
 Camera camera;
 
 int main(void)
@@ -65,8 +67,52 @@ int main(void)
 		std::cout << "Error!" << std::endl;
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
-	VertexUnion vu("res/vertex/cubeVertex.txt");
-	vu.value(positions);
+	//VertexUnion vu("res/vertex/cubeVertex.txt");
+	//vu.value(positions);
+
+	float positions[] = {
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+	};
 
 	glm::vec3 cubePositions[] ={
 		glm::vec3(0.0f,  0.0f,  0.0f),
@@ -85,19 +131,20 @@ int main(void)
 	GLCall(glGenVertexArrays(1, &vao))
 	GLCall(glBindVertexArray(vao))
 
-	std::cout << " ! " <<  vu.GetCount() << std::endl;
+	//std::cout << " ! " <<  vu.GetCount() << std::endl;
 	VertexArray va;
-	VertexBuffer vb(positions,vu.GetCount()*sizeof(float));
+	VertexBuffer vb(positions, sizeof(positions));
 
 	VertexBufferLayout layout;
 	layout.Push<float>(3);
-	layout.Push<float>(2);
+	layout.Push<float>(3);
 	va.AddBuffer(vb, layout);
 
 	Shader shader("res/shader/Object.shader");
 	shader.Bind();
 	shader.SetUniformVec3("objectColor", 1.f, 0.5f, 0.31f);
 	shader.SetUniformVec3("lightColor", 1.f, 1.f, 1.f);
+	shader.SetUniformVec3("lightPos", cubePositions[1].x , cubePositions[1].y , cubePositions[1].z);
 
 	Shader lightShader("res/shader/Light.shader");
 
@@ -141,10 +188,10 @@ int main(void)
 		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, lightShader, camera, ui);
 		//renderer.Mix(false, mixValue, shader );
 		//renderer.DrawCube(va, shader, texture0 , texture1 , cubePositions , ui , rendererNumber );
-		renderer.LightCube(va, shader, cubePositions[0], ui, rendererNumber);
-		renderer.LightCube(va, lightShader, cubePositions[1], ui, rendererNumber);
+		renderer.LightCube(va, shader, cubePositions[0], ui, rendererNumber, translate , false);
+		renderer.LightCube(va, lightShader, cubePositions[1], ui, rendererNumber , translate , true);
 
-		ui.Draw(IMGUI_WIDTH , IMGUI_HEIGHT , cubePositions, rendererNumber , camera);
+		ui.Draw(IMGUI_WIDTH , IMGUI_HEIGHT , shader , translate , SpecularSt , cubePositions, rendererNumber , camera);
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
 
@@ -192,13 +239,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 		if (isMouse == false)
 		{
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); 
+			glfwSetCursorPosCallback(window, NULL);
 			isMouse = true;
 			std::cout << '!' << std::endl;
 		}
 		else
 		{
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			glfwSetCursorPosCallback(window, mouse_callback);
 			isMouse = false;
 			std::cout << '?' << std::endl;
 		}

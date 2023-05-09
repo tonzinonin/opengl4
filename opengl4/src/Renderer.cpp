@@ -34,6 +34,7 @@ void Renderer::MVPTrans(const unsigned int SCREEN_WIDTH, const unsigned int SCRE
 
 	shader.SetUniformMat4f("projection", projection);
 	shader.SetUniformMat4f("view", view);
+	shader.SetUniformVec3("viewPos", camera.cameraPos.x , camera.cameraPos.y , camera.cameraPos.z);
 
 	shader.Unbind();
 }
@@ -92,14 +93,18 @@ void Renderer::Draw(const VertexArray& va, const Shader& shader, const Texture& 
 
 	GLCall(glDrawElements(GL_TRIANGLES, id.GetCount(), GL_UNSIGNED_INT, nullptr));
 }
-void Renderer::LightCube(const VertexArray& va, const Shader& shader, const glm::vec3 cubePositions, OpenglImgui& ui, unsigned int rendererNumber) const
+void Renderer::LightCube(const VertexArray& va, const Shader& shader, const glm::vec3 cubePositions, OpenglImgui& ui, unsigned int rendererNumber
+	, glm::vec3& translate , bool istran) const
 {
 	va.Bind();
 	shader.Bind();
 
 		glm::mat4 model = glm::mat4(1.0);
 		model = glm::translate(model, cubePositions);
-		//float angle = i * 20.0;
+		if(istran == true) model = glm::translate(model, translate);
+
+		unsigned int i = 1.0;
+		float angle = i * 20.0;
 		//model = glm::rotate(model, glm::radians(float(glfwGetTime()) * 30 + angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
 		ui.modelupdate(model);

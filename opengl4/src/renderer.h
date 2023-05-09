@@ -25,5 +25,6 @@ public:
 	void Mix(const int& isAddColor, const float& input, const Shader& shader ) const;
 	void DrawCube(const VertexArray& va, const Shader& shader, const Texture& texture0, const Texture& texture1 , const glm::vec3 *cubePositions, OpenglImgui& openglui, unsigned int rendererNumber) const;
 	void Draw(const VertexArray& va, const Shader& shader, const Texture& texture0, const Texture& texture1, const IndexBuffer& id) const;
-	void LightCube(const VertexArray& va, const Shader& shader, const glm::vec3 cubePositions, OpenglImgui& openglui, unsigned int rendererNumber) const;
+	void LightCube(const VertexArray& va, const Shader& shader, const glm::vec3 cubePositions, OpenglImgui& openglui, unsigned int rendererNumber
+		,glm::vec3& translate , bool istran) const;
 };

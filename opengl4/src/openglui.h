@@ -5,6 +5,7 @@
 #include "imgui/imgui_impl_opengl3.h"
 #include "GLFW/glfw3.h"
 #include "Camera.h"
+#include "Shader.h"
 
 class OpenglImgui
 {
@@ -21,7 +22,7 @@ public:
 		const char* glsl_version = "#version 330";
 		ImGui_ImplOpenGL3_Init(glsl_version);
 	}
-	void Draw(unsigned int IMGUI_WIDTH , unsigned int IMGUI_HEIGHT, glm::vec3* cubePositions , unsigned int rendererNumber, Camera& camera)
+	void Draw(unsigned int IMGUI_WIDTH , unsigned int IMGUI_HEIGHT, Shader& shader , glm::vec3 &translate , float& SpecularSt , glm::vec3* cubePositions , unsigned int rendererNumber, Camera& camera)
 	{
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame(); 
@@ -53,6 +54,13 @@ public:
 					ImGui::Text("object %d :%.3f %.3f %.3f", i, tempvec.x, tempvec.y, tempvec.z);
 				}
 			}
+
+			ImGui::SliderFloat3("Move Light Position ", &translate[0], -1.0, 1.0, "%.3f");
+			ImGui::SliderFloat("Specular Strength : ", &SpecularSt, 0.1, 1.0, "%.3f"); // 创建垂直滚动条控件
+			shader.Bind();
+			shader.SetUniform1f("specularStrength", SpecularSt);
+			shader.Unbind();
+
 			ImGui::Text("world space:%.3f &.3f %.3f", cubePositions[0].x, cubePositions[0].y, cubePositions[0].z);
 			ImGui::Text("LastX(mouse on screen) = %.3f", camera.lastY);
 			ImGui::Text("Lasty(mouse on screen) = %.3f", camera.lastX);
