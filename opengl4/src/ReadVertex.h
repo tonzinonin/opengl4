@@ -10,12 +10,12 @@
 class VertexUnion
 {
 private:
-	const char* Path;
+	std::string  Path;
 	std::vector<float> vertexArr;
 public:
-	VertexUnion(const char* path) : Path(path)
+	VertexUnion(const std::string path) : Path(path)
 	{
-		std::ifstream file(path);
+		std::ifstream file(path.c_str());
 		std::string line;
 		while(getline(file , line))
 		{

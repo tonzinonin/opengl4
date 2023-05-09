@@ -12,7 +12,7 @@ void Renderer::Clear() const
 	GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
-void Renderer::MVPTrans(const unsigned int SCREEN_WIDTH, const unsigned int SCREEN_HEIGHT, const Shader& shader, Camera& camera, OpenglImgui& ui, const glm::vec3* cubePositions) const
+void Renderer::MVPTrans(const unsigned int SCREEN_WIDTH, const unsigned int SCREEN_HEIGHT, const Shader& shader, Camera& camera, OpenglImgui& ui) const
 {
 	shader.Bind();
 	glm::mat4 diy = 
@@ -69,8 +69,8 @@ void Renderer::DrawCube(const VertexArray& va, const Shader& shader , const Text
 	{
 		glm::mat4 model = glm::mat4(1.0);
 		model = glm::translate(model, cubePositions[i]);	
-		float angle = i * 20.0;
-		model = glm::rotate(model, glm::radians(float(glfwGetTime()) * 30 + angle), glm::vec3(1.0f, 0.3f, 0.5f));
+		//float angle = i * 20.0;
+		//model = glm::rotate(model, glm::radians(float(glfwGetTime()) * 30 + angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
 		ui.modelupdate(model);
 
@@ -91,4 +91,19 @@ void Renderer::Draw(const VertexArray& va, const Shader& shader, const Texture& 
 	texture1.Bind(1);
 
 	GLCall(glDrawElements(GL_TRIANGLES, id.GetCount(), GL_UNSIGNED_INT, nullptr));
+}
+void Renderer::LightCube(const VertexArray& va, const Shader& shader, const glm::vec3 cubePositions, OpenglImgui& ui, unsigned int rendererNumber) const
+{
+	va.Bind();
+	shader.Bind();
+
+		glm::mat4 model = glm::mat4(1.0);
+		model = glm::translate(model, cubePositions);
+		//float angle = i * 20.0;
+		//model = glm::rotate(model, glm::radians(float(glfwGetTime()) * 30 + angle), glm::vec3(1.0f, 0.3f, 0.5f));
+
+		ui.modelupdate(model);
+
+		shader.SetUniformMat4f("model", model);
+		GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
 }

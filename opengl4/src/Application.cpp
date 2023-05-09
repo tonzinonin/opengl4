@@ -30,7 +30,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 #define SCREEN_WIDTH 1080
 #define SCREEN_HEIGHT 1080
 #define IMGUI_WIDTH 400
-#define IMGUI_HEIGHT 200
+#define IMGUI_HEIGHT 400
 #define ARR_SIZE 2000
 
 float mixValue = 0.2;
@@ -68,13 +68,13 @@ int main(void)
 	VertexUnion vu("res/vertex/cubeVertex.txt");
 	vu.value(positions);
 
-	glm::vec3 cubePositions[] = {
+	glm::vec3 cubePositions[] ={
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
 		glm::vec3(2.0f,  5.0f, -15.0f),
 		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
 		glm::vec3(1.5f,  2.0f, -2.5f),
 		glm::vec3(2.4f, -0.4f, -3.5f),
-		glm::vec3(0.0f,  0.0f,  0.0f),
 		glm::vec3(-1.7f,  3.0f, -7.5f),
 		glm::vec3(1.3f, -2.0f, -2.5f),
 		glm::vec3(1.5f,  0.2f, -1.5f),
@@ -85,24 +85,29 @@ int main(void)
 	GLCall(glGenVertexArrays(1, &vao))
 	GLCall(glBindVertexArray(vao))
 
+	std::cout << " ! " <<  vu.GetCount() << std::endl;
 	VertexArray va;
-	const VertexBuffer vb(positions,vu.GetCount()*sizeof(float));
+	VertexBuffer vb(positions,vu.GetCount()*sizeof(float));
 
 	VertexBufferLayout layout;
 	layout.Push<float>(3);
 	layout.Push<float>(2);
 	va.AddBuffer(vb, layout);
 
-	Shader shader("res/shader/Cube.shader");
+	Shader shader("res/shader/Object.shader");
 	shader.Bind();
+	shader.SetUniformVec3("objectColor", 1.f, 0.5f, 0.31f);
+	shader.SetUniformVec3("lightColor", 1.f, 1.f, 1.f);
 
-	const Texture texture0("res/textures/container.jpg");
-	texture0.Bind();
-	const Texture texture1("res/textures/awesomeface.png");
-	texture1.Bind();
+	Shader lightShader("res/shader/Light.shader");
 
-	shader.SetUniform1i("texture0", 0);
-	shader.SetUniform1i("texture1", 1);
+	//const Texture texture0("res/textures/container.jpg");
+	//texture0.Bind();
+	//const Texture texture1("res/textures/awesomeface.png");
+	//texture1.Bind();
+
+	//shader.SetUniform1i("texture0", 0);
+	//shader.SetUniform1i("texture1", 1);
 
 	va.Unbind();
 	shader.Unbind();
@@ -132,9 +137,12 @@ int main(void)
 		lastFrame = timeValue;
 
 		renderer.Clear();
-		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, shader, camera, ui , cubePositions);
-		renderer.Mix(false, mixValue, shader );
-		renderer.DrawCube(va, shader, texture0 , texture1 , cubePositions , ui , rendererNumber );
+		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, shader, camera, ui);
+		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, lightShader, camera, ui);
+		//renderer.Mix(false, mixValue, shader );
+		//renderer.DrawCube(va, shader, texture0 , texture1 , cubePositions , ui , rendererNumber );
+		renderer.LightCube(va, shader, cubePositions[0], ui, rendererNumber);
+		renderer.LightCube(va, lightShader, cubePositions[1], ui, rendererNumber);
 
 		ui.Draw(IMGUI_WIDTH , IMGUI_HEIGHT , cubePositions, rendererNumber , camera);
 		/* Swap front and back buffers */

@@ -29,12 +29,6 @@ public:
 		{
 			ImGui::Begin("ImGui"); 
 			//ImGui::SetNextItemOpen(false, ImGuiCond_Once);
-			if (ImGui::CollapsingHeader("local space", ImGuiTreeNodeFlags_DefaultOpen)) {
-				for (unsigned int i = 0; i < rendererNumber; i++)
-				{
-					ImGui::Text("object %d :%.3f %.3f %.3f", i, cubePositions[i].x, cubePositions[i].y, cubePositions[i].z);
-				}
-			}
 
 			if (ImGui::CollapsingHeader("world space", ImGuiTreeNodeFlags_DefaultOpen)) {
 				for (unsigned int i = 0; i < rendererNumber; i++)
@@ -43,12 +37,28 @@ public:
 					ImGui::Text("object %d :%.3f %.3f %.3f", i, tempvec.x, tempvec.y, tempvec.z);
 				}
 			}
+
+			if (ImGui::CollapsingHeader("view space", ImGuiTreeNodeFlags_DefaultOpen)) {
+				for (unsigned int i = 0; i < rendererNumber; i++)
+				{
+					glm::vec4 tempvec = view * model * glm::vec4(cubePositions[i], 0.0);
+					ImGui::Text("object %d :%.3f %.3f %.3f", i, tempvec.x, tempvec.y, tempvec.z);
+				}
+			}
+
+			if (ImGui::CollapsingHeader("clip space", ImGuiTreeNodeFlags_DefaultOpen)) {
+				for (unsigned int i = 0; i < rendererNumber; i++)
+				{
+					glm::vec4 tempvec = projection * view * model * glm::vec4(cubePositions[i], 0.0);
+					ImGui::Text("object %d :%.3f %.3f %.3f", i, tempvec.x, tempvec.y, tempvec.z);
+				}
+			}
 			ImGui::Text("world space:%.3f &.3f %.3f", cubePositions[0].x, cubePositions[0].y, cubePositions[0].z);
-			//ImGui::Text("LastX(mouse on screen) = %.3f", camera.lastY);
-			//ImGui::Text("Lasty(mouse on screen) = %.3f", camera.lastX);
-			//ImGui::Text("Yaw = %.3f", camera.yaw);
-			//ImGui::Text("Pitch = %.3f", camera.pitch);
-			//ImGui::Text("Fov = %.3f", camera.fov);
+			ImGui::Text("LastX(mouse on screen) = %.3f", camera.lastY);
+			ImGui::Text("Lasty(mouse on screen) = %.3f", camera.lastX);
+			ImGui::Text("Yaw = %.3f", camera.yaw);
+			ImGui::Text("Pitch = %.3f", camera.pitch);
+			ImGui::Text("Fov = %.3f", camera.fov);
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::Text("Press R to enable/unenable cursor in window");
 			ImGui::SetWindowSize(ImVec2(IMGUI_WIDTH, IMGUI_HEIGHT));
