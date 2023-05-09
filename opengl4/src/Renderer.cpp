@@ -34,6 +34,7 @@ void Renderer::MVPTrans(const unsigned int SCREEN_WIDTH, const unsigned int SCRE
 
 	shader.SetUniformMat4f("projection", projection);
 	shader.SetUniformMat4f("view", view);
+
 	shader.SetUniformVec3("viewPos", camera.cameraPos.x , camera.cameraPos.y , camera.cameraPos.z);
 
 	shader.Unbind();

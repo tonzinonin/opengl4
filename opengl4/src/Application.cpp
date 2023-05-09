@@ -142,12 +142,25 @@ int main(void)
 
 	Shader shader("res/shader/Object.shader");
 	shader.Bind();
-	shader.SetUniformVec3("objectColor", 1.f, 0.5f, 0.31f);
-	shader.SetUniformVec3("lightColor", 1.f, 1.f, 1.f);
-	shader.SetUniformVec3("lightPos", cubePositions[1].x , cubePositions[1].y , cubePositions[1].z);
+	shader.SetUniformVec3("light.position", cubePositions[1].x , cubePositions[1].y , cubePositions[1].z);
+	shader.SetUniformVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+	shader.SetUniformVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+	shader.SetUniformVec3("material.specular", 0.5f, 0.5f, 0.5f);
+	shader.SetUniform1f("material.shininess", 32.0f);
+	shader.SetUniformVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+	shader.SetUniformVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // 将光照调暗了一些以搭配场景
+	shader.SetUniformVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
 	Shader lightShader("res/shader/Light.shader");
-
+	lightShader.Bind();
+	lightShader.SetUniformMat4f("scale",
+		glm::mat4(
+			0.3, 0, 0, 0,
+			0, 0.3, 0, 0,
+			0, 0, 0.3, 0,
+			0, 0, 0, 1
+		));
+	lightShader.Unbind();
 	//const Texture texture0("res/textures/container.jpg");
 	//texture0.Bind();
 	//const Texture texture1("res/textures/awesomeface.png");
@@ -156,8 +169,8 @@ int main(void)
 	//shader.SetUniform1i("texture0", 0);
 	//shader.SetUniform1i("texture1", 1);
 
-	va.Unbind();
 	shader.Unbind();
+	va.Unbind();
 	vb.Unbind();
 	Renderer renderer;
 

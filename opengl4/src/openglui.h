@@ -56,10 +56,10 @@ public:
 			}
 
 			ImGui::SliderFloat3("Move Light Position ", &translate[0], -1.0, 1.0, "%.3f");
-			ImGui::SliderFloat("Specular Strength : ", &SpecularSt, 0.1, 1.0, "%.3f"); // 创建垂直滚动条控件
-			shader.Bind();
-			shader.SetUniform1f("specularStrength", SpecularSt);
-			shader.Unbind();
+			//ImGui::SliderFloat("Specular Strength : ", &SpecularSt, 0.1, 32.0, "%.3f"); // 创建垂直滚动条控件
+			//shader.Bind();
+			//shader.SetUniform1f("specularStrength", SpecularSt);
+			//shader.Unbind();
 
 			ImGui::Text("world space:%.3f &.3f %.3f", cubePositions[0].x, cubePositions[0].y, cubePositions[0].z);
 			ImGui::Text("LastX(mouse on screen) = %.3f", camera.lastY);

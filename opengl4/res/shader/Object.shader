@@ -26,34 +26,46 @@ void main()
 
 layout(location = 0) out vec4 color;
 
+struct Material
+{
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
+};
+
+struct Light {
+    vec3 position;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+
+uniform Light light;
+uniform Material material;
+uniform vec3 viewPos;
+
+
 in vec3 Normal;
 in vec3 FragPos;
 
-uniform float specularStrength = 0.5;//镜面反射的度数
-uniform vec3 objectColor;
-uniform vec3 lightColor; 
-uniform vec3 lightPos; 
-uniform vec3 viewPos;
 
 void main()
 {
 
-    vec3 norm = normalize(Normal);//法向量的单位向量
-    vec3 lightDir = normalize(lightPos - FragPos);//局部空间中物体指向灯光的单位向量
+    vec3 ambient = material.ambient * light.ambient;//环境光--
 
+    vec3 norm = normalize(Normal);//法向量的单位向量
+    vec3 lightDir = normalize(light.position - FragPos);//局部空间中物体指向灯光的单位向量
+    float diff = max(dot(norm, lightDir), 0.0);//计算漫反射强度
+    vec3 diffuse = (diff * material.diffuse) * light.diffuse;//漫反射--添加了光下表面颜色
+
+    //镜面光
     vec3 viewDir = normalize(viewPos - FragPos);//物体指向摄像机的单位向量
     vec3 reflectDir = reflect(-lightDir, norm);//灯光的镜面反射向量
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    vec3 specular = spec * light.specular * material.specular;
 
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-    //一个物体的反光度越高，反射光的能力越强，散射得越少，高光点就会越小。
-    vec3 specular = specularStrength * spec * lightColor;
-
-    float diff = max(dot(norm, lightDir), 0.0);//计算漫反射强度
-    vec3 diffuse = diff * lightColor;
-
-    float ambientStrength = 0.1;
-    vec3 ambient = ambientStrength * lightColor;
-    
-    vec3 result = (ambient + diffuse + specular) * objectColor;
+    vec3 result = ambient + diffuse + specular;
     color = vec4(result, 1.0);
 }
