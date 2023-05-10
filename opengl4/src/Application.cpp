@@ -99,7 +99,7 @@ int main(void)
 	layout.Push<float>(2);
 	va.AddBuffer(vb, layout);
 
-	Shader shader("res/shader/Object.shader");
+	Shader shader("res/shader/Object.vert" , "res/shader/Object.frag");
 	shader.Bind();
 	
 	shader.SetUniform1f("material.shininess", 32.0f);
@@ -126,7 +126,7 @@ int main(void)
 	//shader.SetUniform1i("material.glow", 2);
 	shader.Unbind();
 
-	Shader lightShader("res/shader/Light.shader");
+	Shader lightShader("res/shader/Light.vert" , "res/shader/Light.frag");
 	lightShader.Bind();
 	lightShader.SetUniformMat4f("scale",
 		glm::mat4(

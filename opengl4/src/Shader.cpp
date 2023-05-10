@@ -2,9 +2,9 @@
 
 #include "Shader.h"
 
-Shader::Shader(const std::string& filepath) : m_FilePath(filepath) , m_RendererID(0)
+Shader::Shader(const std::string& filepath1 , const std::string& filepath2) : v_FilePath(filepath1) , f_FilePath(filepath1) , m_RendererID(0)
 {
-	const ShaderProgramSource source = ParseShader(filepath);
+	const ShaderProgramSource source = ParseShader(filepath1 , filepath2);
 	m_RendererID = CreateShader(source.VertexSource, source.FragmentSource);
 }
 
@@ -61,36 +61,21 @@ unsigned int Shader::GetUniformLocation(const std::string& name) const
 	return location;
 }
 
-ShaderProgramSource Shader::ParseShader(const std::string& filepath) const
+ShaderProgramSource Shader::ParseShader(const std::string& filepath1 , const std::string& filepath2) const
 {
-	std::ifstream stream(filepath);
-
-	enum class Shadertype
-	{
-		NONE = -1, VERTEX = 0, FRAGMENT = 1
-	};
+	std::ifstream vstream(filepath1);
+	std::ifstream fstream(filepath2);
 
 	std::string line;
 	std::stringstream ss[2];
-	Shadertype type = Shadertype::NONE;
 
-	while (getline(stream, line))//一行一行地浏览文件
+	while (getline(vstream, line))//一行一行地浏览文件
 	{
-		if (line.find("#shader") != std::string::npos)
-		{
-			if (line.find("vertex") != std::string::npos)
-			{//set mode to vertex
-				type = Shadertype::VERTEX;
-			}
-			else if (line.find("fragment") != std::string::npos)
-			{//set mode to fragment
-				type = Shadertype::FRAGMENT;
-			}
-		}
-		else
-		{
-			ss[(int)type] << line << '\n';
-		}
+		ss[0] << line << '\n';
+	}	
+	while (getline(fstream, line))//一行一行地浏览文件
+	{
+		ss[1] << line << '\n';
 	}
 	return { ss[0].str() , ss[1].str() };
 }
