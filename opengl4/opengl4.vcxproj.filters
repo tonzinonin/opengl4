@@ -66,11 +66,16 @@
     <ClCompile Include="src\FaultChecking.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Light.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="imgui.ini" />
+    <None Include="res\shader\Object.frag" />
+    <None Include="res\shader\Light.vert" />
     <None Include="res\shader\Object.vert" />
-    <None Include="res\shader\Light.shader" />
+    <None Include="res\shader\Light.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer.h">
@@ -134,6 +139,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\FaultChecking.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

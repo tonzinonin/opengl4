@@ -72,17 +72,21 @@ int main(void)
 	glm::vec3 cubePositions[] ={
 		glm::vec3(0.0f,  0.0f,  0.0f),
 		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
 		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(1.5f,  2.0f, -2.5f),
 		glm::vec3(2.4f, -0.4f, -3.5f),
 		glm::vec3(-1.7f,  3.0f, -7.5f),
 		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
 		glm::vec3(1.5f,  0.2f, -1.5f),
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
 	glm::vec3 lightPositions[] = {
-		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(0.7f,  0.2f,  2.0f),
+		glm::vec3(2.3f, -3.3f, -4.0f),
+		glm::vec3(-4.0f,  2.0f, -12.0f),
+		glm::vec3(0.0f,  0.0f, -3.0f)
 	};
 
 	unsigned int vao;
@@ -103,18 +107,48 @@ int main(void)
 	shader.Bind();
 	
 	shader.SetUniform1f("material.shininess", 32.0f);
+	for (int i = 0; i < 4; i++)
+	{
+		std::string str = "pointlight[";
+		char idx = i + '0';
+		str.push_back(idx);
+		std::string str1 = str + "].position";
+		shader.SetUniformVec3(str1.c_str(), lightPositions[i].x, lightPositions[i].y, lightPositions[i].z);
 
-	shader.SetUniformVec3("light.position", lightPositions[0].x, lightPositions[0].y, lightPositions[0].z);
-	shader.SetUniformVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-	shader.SetUniformVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // 将光照调暗了一些以搭配场景
-	shader.SetUniformVec3("light.specular", 1.0f, 1.0f, 1.0f);
+		std::string str2 = str + "].diffuse";
+		shader.SetUniformVec3(str2.c_str(), 0.5f, 0.5f, 0.5f);
 
-	shader.SetUniform1f("light.constant", 1.0f);
-	shader.SetUniform1f("light.linea", 0.09f);
-	shader.SetUniform1f("light.quadratic", 0.032f);
+		std::string str3 = str + "].ambient";
+		shader.SetUniformVec3(str3.c_str(), 0.2f, 0.2f, 0.2f);
 
-	shader.SetUniform1f("light.cutOff", glm::cos(glm::radians(12.5f)));
-	shader.SetUniform1f("light.outerCutOff", glm::cos(glm::radians(15.5f)));
+		std::string str4 = str + "].specular";
+		shader.SetUniformVec3(str4.c_str(), 1.0f, 1.0f, 1.0f);
+
+		std::string str5 = str + "].quadratic";
+		shader.SetUniform1f(str5.c_str(), 0.032f);
+
+		std::string str6 = str + "].constant";
+		shader.SetUniform1f(str6.c_str(), 1.0f);
+
+		std::string str7 = str + "].linea";
+		shader.SetUniform1f(str7.c_str(), 0.09f);
+	}
+	shader.SetUniformVec3("dirlight.direction", -0.2f, -1.0f, -0.3f);
+
+	shader.SetUniformVec3("dirlight.ambient", 0.2f, 0.2f, 0.2f);
+	shader.SetUniformVec3("dirlight.diffuse", 0.5f, 0.5f, 0.5f); // 将光照调暗了一些以搭配场景
+	shader.SetUniformVec3("dirlight.specular", 1.0f, 1.0f, 1.0f);
+
+	shader.SetUniformVec3("spotlight.ambient", 0.2f, 0.2f, 0.2f);
+	shader.SetUniformVec3("spotlight.diffuse", 0.5f, 0.5f, 0.5f); // 将光照调暗了一些以搭配场景
+	shader.SetUniformVec3("spotlight.specular", 1.0f, 1.0f, 1.0f);
+
+	shader.SetUniform1f("spotlight.constant", 1.0f);
+	shader.SetUniform1f("spotlight.linea", 0.09f);
+	shader.SetUniform1f("spotlight.quadratic", 0.032f);
+
+	shader.SetUniform1f("spotlight.cutOff", glm::cos(glm::radians(12.5f)));
+	shader.SetUniform1f("spotlight.outerCutOff", glm::cos(glm::radians(15.5f)));
 	//shader.SetUniformVec3("light.direction", -0.2f, -1.0f, -0.3f);
 
 	Texture texture0("res/textures/container2.png");
@@ -139,7 +173,7 @@ int main(void)
 	va.Unbind();
 	vb.Unbind();
 
-	OpenglImgui ui(window, shader, camera, cubePositions, 9);
+	OpenglImgui ui(window, shader, camera, cubePositions, 10);
 
 	Renderer renderer(camera , ui , va , texture0);
 
@@ -171,17 +205,17 @@ int main(void)
 
 		shader.Bind();  
 		//shader.SetUniform1f("movement", timeValue);
-		shader.SetUniformVec3("light.direction", camera.cameraFront.x, camera.cameraFront.y, camera.cameraFront.z);
+		shader.SetUniformVec3("spotlight.direction", camera.cameraFront.x, camera.cameraFront.y, camera.cameraFront.z);
 		shader.SetUniformVec3("viewPos", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
-		shader.SetUniformVec3("light.position", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
+		shader.SetUniformVec3("spotlight.position", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
 		shader.Unbind();
 
 		//renderer.Mix(false, mixValue, shader );
 		//renderer.DrawCube(va, shader, texture0 , texture1 , cubePositions , ui , rendererNumber );
 		
-		renderer.Cube(shader, cubePositions ,9);
+		renderer.Cube(shader, cubePositions ,10);
 		renderer.isMove = true;
-		renderer.Cube(lightShader, lightPositions ,1);
+		renderer.Cube(lightShader, lightPositions , 4);
 		renderer.isMove = false;
 
 		ui.Draw(IMGUI_WIDTH , IMGUI_HEIGHT);

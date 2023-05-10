@@ -133,5 +133,5 @@ void main()
     }
     output += CalculateSpotLight(spotlight , norm , viewDir , FragPos);
 
-    color = vec4(output , 1.0)
+    color = vec4(output , 1.0);
 }

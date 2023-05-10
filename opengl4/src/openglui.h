@@ -48,9 +48,9 @@ public:
 
 		shader.Bind();
 		shader.SetUniform1f("material.shininess", material_shininess);
-		shader.SetUniformVec3("light.ambient", light_ambient.x , light_ambient.y , light_ambient.z);
-		shader.SetUniformVec3("light.diffuse", light_diffuse.x , light_diffuse.y , light_diffuse.z); // 将光照调暗了一些以搭配场景
-		shader.SetUniformVec3("light.specular", light_specular.x , light_specular.y , light_specular.z);
+		shader.SetUniformVec3("spotlight.ambient", light_ambient.x , light_ambient.y , light_ambient.z);
+		shader.SetUniformVec3("spotlight.diffuse", light_diffuse.x , light_diffuse.y , light_diffuse.z); // 将光照调暗了一些以搭配场景
+		shader.SetUniformVec3("spotlight.specular", light_specular.x , light_specular.y , light_specular.z);
 		shader.Unbind();
 		//ImGui::SliderFloat(light)
 	}
