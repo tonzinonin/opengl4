@@ -11,7 +11,7 @@ uniform mat4 scale;
 
 void main()
 {
-    gl_Position = projection * view * model * scale * vec4(position, 1.0);
+    gl_Position = projection * view * model *scale * vec4(position, 1.0);
 }
 
 

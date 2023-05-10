@@ -27,10 +27,10 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-#define SCREEN_WIDTH 1080
+#define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 1080
 #define IMGUI_WIDTH 400
-#define IMGUI_HEIGHT 400
+#define IMGUI_HEIGHT 600
 #define ARR_SIZE 2000
 
 float mixValue = 0.2;
@@ -38,9 +38,8 @@ float deltaTime = 0.0f; // 当前帧与上一帧的时间差
 float lastFrame = 0.0f; // 上一帧的时间
 bool isMouse = false;
 float SpecularSt = 0.5;
-//float positions[ARR_SIZE];
+float positions[ARR_SIZE];
 
-glm::vec3 translate = glm::vec3(0., 0., 0.);
 Camera camera;
 
 int main(void)
@@ -67,10 +66,10 @@ int main(void)
 		std::cout << "Error!" << std::endl;
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
-	//VertexUnion vu("res/vertex/cubeVertex.txt");
-	//vu.value(positions);
+	VertexUnion vu("res/vertex/cubeVertex.txt");
+	vu.value(positions);
 
-	float positions[] = {
+	/*float positions[] = {
 	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 	 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -112,11 +111,10 @@ int main(void)
 	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
 	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
 	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
-	};
+	};*/
 
 	glm::vec3 cubePositions[] ={
 		glm::vec3(0.0f,  0.0f,  0.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
 		glm::vec3(2.0f,  5.0f, -15.0f),
 		glm::vec3(-3.8f, -2.0f, -12.3f),
 		glm::vec3(1.5f,  2.0f, -2.5f),
@@ -127,13 +125,17 @@ int main(void)
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
+	glm::vec3 lightPositions[] = {
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+	};
+
 	unsigned int vao;
 	GLCall(glGenVertexArrays(1, &vao))
 	GLCall(glBindVertexArray(vao))
 
 	//std::cout << " ! " <<  vu.GetCount() << std::endl;
 	VertexArray va;
-	VertexBuffer vb(positions, sizeof(positions));
+	VertexBuffer vb(positions, vu.GetCount() * sizeof(float));
 
 	VertexBufferLayout layout;
 	layout.Push<float>(3);
@@ -142,7 +144,7 @@ int main(void)
 
 	Shader shader("res/shader/Object.shader");
 	shader.Bind();
-	shader.SetUniformVec3("light.position", cubePositions[1].x , cubePositions[1].y , cubePositions[1].z);
+	shader.SetUniformVec3("light.position", lightPositions[0].x , lightPositions[0].y , lightPositions[0].z);
 	shader.SetUniformVec3("material.ambient", 1.0f, 0.5f, 0.31f);
 	shader.SetUniformVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
 	shader.SetUniformVec3("material.specular", 0.5f, 0.5f, 0.5f);
@@ -155,12 +157,13 @@ int main(void)
 	lightShader.Bind();
 	lightShader.SetUniformMat4f("scale",
 		glm::mat4(
-			0.3, 0, 0, 0,
-			0, 0.3, 0, 0,
-			0, 0, 0.3, 0,
-			0, 0, 0, 1
+			0.3,  0,  0, 0,
+			  0,0.3,  0, 0,
+			  0,  0,0.3, 0,
+		      0,  0,  0, 1
 		));
 	lightShader.Unbind();
+
 	//const Texture texture0("res/textures/container.jpg");
 	//texture0.Bind();
 	//const Texture texture1("res/textures/awesomeface.png");
@@ -172,9 +175,10 @@ int main(void)
 	shader.Unbind();
 	va.Unbind();
 	vb.Unbind();
-	Renderer renderer;
 
-	OpenglImgui ui(window);
+	OpenglImgui ui(window, shader, camera, cubePositions, 1);
+
+	Renderer renderer(camera , ui , va);
 
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
@@ -186,8 +190,6 @@ int main(void)
 	glEnable(GL_DEPTH_TEST);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	unsigned int rendererNumber = 2;
-
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
@@ -197,14 +199,23 @@ int main(void)
 		lastFrame = timeValue;
 
 		renderer.Clear();
-		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, shader, camera, ui);
-		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, lightShader, camera, ui);
+		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, shader);
+		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, lightShader);
+
+		shader.Bind();  
+		shader.SetUniformVec3("viewPos", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
+		shader.SetUniformVec3("light.position", lightPositions[0].x + ui.trans.x, lightPositions[0].y + ui.trans.y, lightPositions[0].z + ui.trans.z);
+		shader.Unbind();
+
 		//renderer.Mix(false, mixValue, shader );
 		//renderer.DrawCube(va, shader, texture0 , texture1 , cubePositions , ui , rendererNumber );
-		renderer.LightCube(va, shader, cubePositions[0], ui, rendererNumber, translate , false);
-		renderer.LightCube(va, lightShader, cubePositions[1], ui, rendererNumber , translate , true);
 
-		ui.Draw(IMGUI_WIDTH , IMGUI_HEIGHT , shader , translate , SpecularSt , cubePositions, rendererNumber , camera);
+		renderer.Cube(shader, cubePositions ,1);
+		renderer.isMove = true;
+		renderer.Cube(lightShader, lightPositions ,1);
+		renderer.isMove = false;
+
+		ui.Draw(IMGUI_WIDTH , IMGUI_HEIGHT);
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
 

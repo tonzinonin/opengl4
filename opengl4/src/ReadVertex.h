@@ -15,10 +15,12 @@ private:
 public:
 	VertexUnion(const std::string path) : Path(path)
 	{
-		std::ifstream file(path.c_str());
+		std::ifstream file(path);
 		std::string line;
+		unsigned int i = 1;
 		while(getline(file , line))
 		{
+			std::cout << i++ << std::endl;
 			if (line.empty())
 			{
 				continue;

@@ -12,7 +12,7 @@ void Renderer::Clear() const
 	GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
-void Renderer::MVPTrans(const unsigned int SCREEN_WIDTH, const unsigned int SCREEN_HEIGHT, const Shader& shader, Camera& camera, OpenglImgui& ui) const
+void Renderer::MVPTrans(const unsigned int SCREEN_WIDTH, const unsigned int SCREEN_HEIGHT, const Shader& shader) const
 {
 	shader.Bind();
 	glm::mat4 diy = 
@@ -34,12 +34,8 @@ void Renderer::MVPTrans(const unsigned int SCREEN_WIDTH, const unsigned int SCRE
 
 	shader.SetUniformMat4f("projection", projection);
 	shader.SetUniformMat4f("view", view);
-
-	shader.SetUniformVec3("viewPos", camera.cameraPos.x , camera.cameraPos.y , camera.cameraPos.z);
-
 	shader.Unbind();
 }
-
 void Renderer::Mix(const int& isAddColor, const float& input, const Shader& shader ) const
 {
 	shader.Bind();
@@ -56,55 +52,40 @@ void Renderer::Mix(const int& isAddColor, const float& input, const Shader& shad
 	shader.Unbind();
 }
 
-void Renderer::DrawCube(const VertexArray& va, const Shader& shader , const Texture& texture0, const Texture& texture1 , const glm::vec3 *cubePositions,
-	OpenglImgui& ui, unsigned int rendererNumber) const
+void Renderer::BindTexture(const Texture& texture0, const Texture& texture1) const
 {
-	shader.Bind();
-	va.Bind();
-
 	glActiveTexture(GL_TEXTURE0);
 	texture0.Bind(0);
 	glActiveTexture(GL_TEXTURE1);
 	texture1.Bind(1);
-
-	for (unsigned int i = 0; i < rendererNumber; i++)
-	{
-		glm::mat4 model = glm::mat4(1.0);
-		model = glm::translate(model, cubePositions[i]);	
-		//float angle = i * 20.0;
-		//model = glm::rotate(model, glm::radians(float(glfwGetTime()) * 30 + angle), glm::vec3(1.0f, 0.3f, 0.5f));
-
-		ui.modelupdate(model);
-
-		shader.SetUniformMat4f("model", model);
-		GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
-	}
 }
 
-void Renderer::Draw(const VertexArray& va, const Shader& shader, const Texture& texture0, const Texture& texture1, const IndexBuffer& id) const
+void Renderer::Draw(const Shader& shader, const Texture& texture0, const Texture& texture1 , IndexBuffer& id) const
 {
 	shader.Bind();
 	va.Bind();
 	id.Bind();
 
-	glActiveTexture(GL_TEXTURE0);
-	texture0.Bind(0);
-	glActiveTexture(GL_TEXTURE1);
-	texture1.Bind(1);
+	BindTexture(texture0, texture1);
 
-	GLCall(glDrawElements(GL_TRIANGLES, id.GetCount(), GL_UNSIGNED_INT, nullptr));
+	GLCall(glDrawElements(GL_TRIANGLES, id.GetCount(), GL_UNSIGNED_INT, nullptr));	
+	
+	shader.Unbind();
+	va.Unbind();
+	id.Unbind();
 }
-void Renderer::LightCube(const VertexArray& va, const Shader& shader, const glm::vec3 cubePositions, OpenglImgui& ui, unsigned int rendererNumber
-	, glm::vec3& translate , bool istran) const
+void Renderer::Cube(const Shader& shader, const glm::vec3* cubePositions ,const unsigned int& count) const
 {
 	va.Bind();
 	shader.Bind();
-
+	for (unsigned int i = 0; i < count; i++)
+	{
 		glm::mat4 model = glm::mat4(1.0);
-		model = glm::translate(model, cubePositions);
-		if(istran == true) model = glm::translate(model, translate);
-
-		unsigned int i = 1.0;
+		if (isMove)
+		{
+			model = glm::translate(model, ui.trans);
+		}
+		model = glm::translate(model, cubePositions[i]);
 		float angle = i * 20.0;
 		//model = glm::rotate(model, glm::radians(float(glfwGetTime()) * 30 + angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
@@ -112,4 +93,8 @@ void Renderer::LightCube(const VertexArray& va, const Shader& shader, const glm:
 
 		shader.SetUniformMat4f("model", model);
 		GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
+	}
+
+	shader.Unbind();
+	va.Unbind();
 }

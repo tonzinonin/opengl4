@@ -19,12 +19,23 @@ bool GLLogCall(const char* function, const char* file, int line);
 class Renderer
 { 
 private:
+	Camera& camera;
+	OpenglImgui& ui;
+	VertexArray& va;
 public:
+	bool isMove;
+
+	Renderer(Camera& camera,OpenglImgui& ui,VertexArray& va) 
+	:camera(camera) , ui(ui) , va(va){}
 	void Clear() const;
-	void MVPTrans(const unsigned int width , const unsigned int height, const Shader& shader, Camera& camera , OpenglImgui& openglui) const;
-	void Mix(const int& isAddColor, const float& input, const Shader& shader ) const;
-	void DrawCube(const VertexArray& va, const Shader& shader, const Texture& texture0, const Texture& texture1 , const glm::vec3 *cubePositions, OpenglImgui& openglui, unsigned int rendererNumber) const;
-	void Draw(const VertexArray& va, const Shader& shader, const Texture& texture0, const Texture& texture1, const IndexBuffer& id) const;
-	void LightCube(const VertexArray& va, const Shader& shader, const glm::vec3 cubePositions, OpenglImgui& openglui, unsigned int rendererNumber
-		,glm::vec3& translate , bool istran) const;
+
+	void MVPTrans(const unsigned int width , const unsigned int height , const Shader& shader) const;
+
+	void BindTexture(const Texture& texture0, const Texture& texture1) const;
+
+	void Mix(const int& isAddColor, const float& input, const Shader& shader) const;
+	void Draw(const Shader& shader, const Texture& texture0, const Texture& texture1 , IndexBuffer& id) const;
+	void Cube(const Shader& shader, const glm::vec3* cubePositions ,const unsigned int& count) const;
+
+	inline void UpdateViewPos(Shader& shader) { shader.Bind();  shader.SetUniformVec3("viewPos", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z); shader.Unbind(); }
 };
