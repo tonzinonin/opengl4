@@ -2,13 +2,10 @@
 
 #include "Renderer.h"
 #include <iostream>//处理类抽象
-#include <GLFW/glfw3.h>
-
-#include "glm/glm/glm.hpp"
-#include "glm/glm/gtc/matrix_transform.hpp"
 
 void Renderer::Clear() const
 {
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
@@ -52,12 +49,10 @@ void Renderer::Mix(const int& isAddColor, const float& input, const Shader& shad
 	shader.Unbind();
 }
 
-void Renderer::BindTexture(const Texture& texture0, const Texture& texture1) const
+void Renderer::BindTexture() const
 {
 	glActiveTexture(GL_TEXTURE0);
-	texture0.Bind(0);
-	glActiveTexture(GL_TEXTURE1);
-	texture1.Bind(1);
+	tx.Bind(0);
 }
 
 void Renderer::Draw(const Shader& shader, const Texture& texture0, const Texture& texture1 , IndexBuffer& id) const
@@ -65,8 +60,6 @@ void Renderer::Draw(const Shader& shader, const Texture& texture0, const Texture
 	shader.Bind();
 	va.Bind();
 	id.Bind();
-
-	BindTexture(texture0, texture1);
 
 	GLCall(glDrawElements(GL_TRIANGLES, id.GetCount(), GL_UNSIGNED_INT, nullptr));	
 	
@@ -78,6 +71,7 @@ void Renderer::Cube(const Shader& shader, const glm::vec3* cubePositions ,const 
 {
 	va.Bind();
 	shader.Bind();
+
 	for (unsigned int i = 0; i < count; i++)
 	{
 		glm::mat4 model = glm::mat4(1.0);

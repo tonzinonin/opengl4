@@ -69,50 +69,6 @@ int main(void)
 	VertexUnion vu("res/vertex/cubeVertex.txt");
 	vu.value(positions);
 
-	/*float positions[] = {
-	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-
-	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-
-	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-	-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-
-	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-
-	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-
-	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-	 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
-	};*/
-
 	glm::vec3 cubePositions[] ={
 		glm::vec3(0.0f,  0.0f,  0.0f),
 		glm::vec3(2.0f,  5.0f, -15.0f),
@@ -140,45 +96,42 @@ int main(void)
 	VertexBufferLayout layout;
 	layout.Push<float>(3);
 	layout.Push<float>(3);
+	layout.Push<float>(2);
 	va.AddBuffer(vb, layout);
 
 	Shader shader("res/shader/Object.shader");
 	shader.Bind();
 	shader.SetUniformVec3("light.position", lightPositions[0].x , lightPositions[0].y , lightPositions[0].z);
-	shader.SetUniformVec3("material.ambient", 1.0f, 0.5f, 0.31f);
-	shader.SetUniformVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
-	shader.SetUniformVec3("material.specular", 0.5f, 0.5f, 0.5f);
 	shader.SetUniform1f("material.shininess", 32.0f);
 	shader.SetUniformVec3("light.ambient", 0.2f, 0.2f, 0.2f);
 	shader.SetUniformVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // 将光照调暗了一些以搭配场景
 	shader.SetUniformVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
+	Texture texture0("res/textures/container2.png");
+	Texture texture1("res/textures/container2_specular.png");
+	Texture texture2("res/textures/matrix.jpg");
+
+	shader.SetUniform1i("material.diffuse", 0);
+	shader.SetUniform1i("material.specular", 1);
+	shader.SetUniform1i("material.glow", 2);
+	shader.Unbind();
+
 	Shader lightShader("res/shader/Light.shader");
 	lightShader.Bind();
 	lightShader.SetUniformMat4f("scale",
 		glm::mat4(
-			0.3,  0,  0, 0,
-			  0,0.3,  0, 0,
-			  0,  0,0.3, 0,
-		      0,  0,  0, 1
+			0.3, 0, 0, 0,
+			0, 0.3, 0, 0,
+			0, 0, 0.3, 0,
+			0, 0, 0, 1
 		));
 	lightShader.Unbind();
-
-	//const Texture texture0("res/textures/container.jpg");
-	//texture0.Bind();
-	//const Texture texture1("res/textures/awesomeface.png");
-	//texture1.Bind();
-
-	//shader.SetUniform1i("texture0", 0);
-	//shader.SetUniform1i("texture1", 1);
-
-	shader.Unbind();
 	va.Unbind();
 	vb.Unbind();
 
-	OpenglImgui ui(window, shader, camera, cubePositions, 1);
+	OpenglImgui ui(window, shader, camera, cubePositions, 9);
 
-	Renderer renderer(camera , ui , va);
+	Renderer renderer(camera , ui , va , texture0);
 
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
@@ -198,19 +151,24 @@ int main(void)
 		deltaTime = timeValue - lastFrame;
 		lastFrame = timeValue;
 
+		texture0.Bind(0);
+		texture1.Bind(1);
+		texture2.Bind(2);
+
 		renderer.Clear();
 		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, shader);
 		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, lightShader);
 
 		shader.Bind();  
+		shader.SetUniform1f("movement", timeValue);
 		shader.SetUniformVec3("viewPos", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
 		shader.SetUniformVec3("light.position", lightPositions[0].x + ui.trans.x, lightPositions[0].y + ui.trans.y, lightPositions[0].z + ui.trans.z);
 		shader.Unbind();
 
 		//renderer.Mix(false, mixValue, shader );
 		//renderer.DrawCube(va, shader, texture0 , texture1 , cubePositions , ui , rendererNumber );
-
-		renderer.Cube(shader, cubePositions ,1);
+		
+		renderer.Cube(shader, cubePositions ,9);
 		renderer.isMove = true;
 		renderer.Cube(lightShader, lightPositions ,1);
 		renderer.isMove = false;

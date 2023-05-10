@@ -22,9 +22,6 @@ public:
 
 	glm::vec3 trans= glm::vec3(0., 0., 0.);
 
-	glm::vec3 material_ambient = glm::vec3(1.0f, 0.5f, 0.31f);
-	glm::vec3 material_diffuse = glm::vec3(1.0f, 0.5f, 0.31f);
-	glm::vec3 material_specular = glm::vec3(0.5f, 0.5f, 0.5f);
 	float material_shininess = 32.0f;
 	glm::vec3 light_ambient = glm::vec3(0.2f, 0.2f, 0.2f);
 	glm::vec3 light_diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
@@ -44,18 +41,12 @@ public:
 	{
 		ImGui::SliderFloat3("Move Light Position ", &trans[0], -1.0, 1.0, "%.3f");
 
-		ImGui::SliderFloat3("material.ambient", &material_ambient[0], 0.0 , 1.0 , "%.3f");
-		ImGui::SliderFloat3("material.diffuse", &material_diffuse[0], 0.0, 1.0, "%.3f");
-		ImGui::SliderFloat3("material.specular", &material_specular[0], 0.0, 1.0, "%.3f");
-		ImGui::SliderFloat3("material.shininess", &material_shininess, 0.1, 64.0, "%.3f");
+		ImGui::SliderFloat("material.shininess", &material_shininess, 0.1, 64.0, "%.3f");
 		ImGui::SliderFloat3("light.ambient", &light_ambient[0], 0.0, 1.0, "%.3f");
 		ImGui::SliderFloat3("light.diffuse", &light_diffuse[0], 0.0, 1.0, "%.3f"); // 将光照调暗了一些以搭配场景
 		ImGui::SliderFloat3("light.specular", &light_specular[0], 0.0, 1.0, "%.3f");
 
 		shader.Bind();
-		shader.SetUniformVec3("material.ambient", material_ambient.x , material_ambient.y , material_ambient.z);
-		shader.SetUniformVec3("material.diffuse", material_diffuse.x , material_diffuse.y , material_diffuse.z);
-		shader.SetUniformVec3("material.specular", material_specular.x, material_specular.y, material_specular.z);
 		shader.SetUniform1f("material.shininess", material_shininess);
 		shader.SetUniformVec3("light.ambient", light_ambient.x , light_ambient.y , light_ambient.z);
 		shader.SetUniformVec3("light.diffuse", light_diffuse.x , light_diffuse.y , light_diffuse.z); // 将光照调暗了一些以搭配场景

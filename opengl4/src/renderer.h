@@ -22,16 +22,16 @@ private:
 	Camera& camera;
 	OpenglImgui& ui;
 	VertexArray& va;
+	Texture& tx;
 public:
 	bool isMove;
 
-	Renderer(Camera& camera,OpenglImgui& ui,VertexArray& va) 
-	:camera(camera) , ui(ui) , va(va){}
+	Renderer(Camera& cam, OpenglImgui& ui, VertexArray& va , Texture& texture)
+	:camera(cam), ui(ui), va(va) , tx(texture){}
 	void Clear() const;
-
 	void MVPTrans(const unsigned int width , const unsigned int height , const Shader& shader) const;
 
-	void BindTexture(const Texture& texture0, const Texture& texture1) const;
+	void BindTexture() const;
 
 	void Mix(const int& isAddColor, const float& input, const Shader& shader) const;
 	void Draw(const Shader& shader, const Texture& texture0, const Texture& texture1 , IndexBuffer& id) const;
