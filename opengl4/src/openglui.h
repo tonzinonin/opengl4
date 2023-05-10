@@ -63,23 +63,7 @@ public:
 				ImGui::Text("object %d :%.3f %.3f %.3f", i, tempvec.x, tempvec.y, tempvec.z);
 			}
 		}
-
-		if (ImGui::CollapsingHeader("view space", ImGuiTreeNodeFlags_DefaultOpen)) {
-			for (unsigned int i = 0; i < rendererNumber; i++)
-			{
-				glm::vec4 tempvec = view * model * glm::vec4(cubePositions[i], 0.0);
-				ImGui::Text("object %d :%.3f %.3f %.3f", i, tempvec.x, tempvec.y, tempvec.z);
-			}
-		}
-
-		if (ImGui::CollapsingHeader("clip space", ImGuiTreeNodeFlags_DefaultOpen)) {
-			for (unsigned int i = 0; i < rendererNumber; i++)
-			{
-				glm::vec4 tempvec = projection * view * model * glm::vec4(cubePositions[i], 0.0);
-				ImGui::Text("object %d :%.3f %.3f %.3f", i, tempvec.x, tempvec.y, tempvec.z);
-			}
-		}
-		ImGui::Text("world space:%.3f &.3f %.3f", cubePositions[0].x, cubePositions[0].y, cubePositions[0].z);
+		ImGui::Text("camera position: x = %.3f , y = %.3f , z = %.3f", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
 		ImGui::Text("LastX(mouse on screen) = %.3f", camera.lastY);
 		ImGui::Text("Lasty(mouse on screen) = %.3f", camera.lastX);
 		ImGui::Text("Yaw = %.3f", camera.yaw);

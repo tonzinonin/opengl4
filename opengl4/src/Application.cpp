@@ -27,7 +27,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-#define SCREEN_WIDTH 1280
+#define SCREEN_WIDTH 1080
 #define SCREEN_HEIGHT 1080
 #define IMGUI_WIDTH 400
 #define IMGUI_HEIGHT 600
@@ -101,19 +101,29 @@ int main(void)
 
 	Shader shader("res/shader/Object.shader");
 	shader.Bind();
-	shader.SetUniformVec3("light.position", lightPositions[0].x , lightPositions[0].y , lightPositions[0].z);
+	
 	shader.SetUniform1f("material.shininess", 32.0f);
+
+	shader.SetUniformVec3("light.position", lightPositions[0].x, lightPositions[0].y, lightPositions[0].z);
 	shader.SetUniformVec3("light.ambient", 0.2f, 0.2f, 0.2f);
 	shader.SetUniformVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // 将光照调暗了一些以搭配场景
 	shader.SetUniformVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
+	shader.SetUniform1f("light.constant", 1.0f);
+	shader.SetUniform1f("light.linea", 0.09f);
+	shader.SetUniform1f("light.quadratic", 0.032f);
+
+	shader.SetUniform1f("light.cutOff", glm::cos(glm::radians(12.5f)));
+	shader.SetUniform1f("light.outerCutOff", glm::cos(glm::radians(15.5f)));
+	//shader.SetUniformVec3("light.direction", -0.2f, -1.0f, -0.3f);
+
 	Texture texture0("res/textures/container2.png");
 	Texture texture1("res/textures/container2_specular.png");
-	Texture texture2("res/textures/matrix.jpg");
+	//Texture texture2("res/textures/matrix.jpg");
 
 	shader.SetUniform1i("material.diffuse", 0);
 	shader.SetUniform1i("material.specular", 1);
-	shader.SetUniform1i("material.glow", 2);
+	//shader.SetUniform1i("material.glow", 2);
 	shader.Unbind();
 
 	Shader lightShader("res/shader/Light.shader");
@@ -153,16 +163,17 @@ int main(void)
 
 		texture0.Bind(0);
 		texture1.Bind(1);
-		texture2.Bind(2);
+		//texture2.Bind(2);
 
 		renderer.Clear();
 		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, shader);
 		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, lightShader);
 
 		shader.Bind();  
-		shader.SetUniform1f("movement", timeValue);
+		//shader.SetUniform1f("movement", timeValue);
+		shader.SetUniformVec3("light.direction", camera.cameraFront.x, camera.cameraFront.y, camera.cameraFront.z);
 		shader.SetUniformVec3("viewPos", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
-		shader.SetUniformVec3("light.position", lightPositions[0].x + ui.trans.x, lightPositions[0].y + ui.trans.y, lightPositions[0].z + ui.trans.z);
+		shader.SetUniformVec3("light.position", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
 		shader.Unbind();
 
 		//renderer.Mix(false, mixValue, shader );

@@ -5,7 +5,7 @@
 
 void Renderer::Clear() const
 {
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	//glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
@@ -81,7 +81,7 @@ void Renderer::Cube(const Shader& shader, const glm::vec3* cubePositions ,const 
 		}
 		model = glm::translate(model, cubePositions[i]);
 		float angle = i * 20.0;
-		//model = glm::rotate(model, glm::radians(float(glfwGetTime()) * 30 + angle), glm::vec3(1.0f, 0.3f, 0.5f));
+		model = glm::rotate(model, glm::radians(float(glfwGetTime()) * 30 + angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
 		ui.modelupdate(model);
 
