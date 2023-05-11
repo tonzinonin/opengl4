@@ -1,3 +1,5 @@
+
+
 #include <iostream>
 //#include "GLAD/glad.h"
 #include <GL/glew.h>
@@ -101,7 +103,7 @@ int main(void)
 		glm::vec3(0.0f,  0.0f, -3.0f)
 	};
 	Shader ourShader("res/shader/ourShader.vert" , "res/shader/ourShader.frag");
-	Model ourModel("res/model/nanosuit.mtl");
+	Model ourModel("res/model/nanosuit.obj");
 
 	unsigned int vao;
 	GLCall(glGenVertexArrays(1, &vao))
@@ -187,7 +189,7 @@ int main(void)
 	va.Unbind();
 	vb.Unbind();
 
-	OpenglImgui ui(window, shader, camera, cubePositions, 10);
+	OpenglImgui ui(window, shader, camera, cubePositions, 2);
 
 	Renderer renderer(camera, ui, va, texture0);
 
@@ -221,7 +223,7 @@ int main(void)
 		//renderer.Mix(false, mixValue, shader );
 		//renderer.DrawCube(va, shader, texture0 , texture1 , cubePositions , ui , rendererNumber );
 
-		renderer.Cube(shader, cubePositions, 10);
+		renderer.Cube(shader, cubePositions, 2);
 		renderer.isMove = true;
 		renderer.Cube(lightShader, lightPositions, 1);
 		renderer.isMove = false;
@@ -236,7 +238,10 @@ int main(void)
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
 		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+		ourShader.SetUniformMat4f("model", model);
 		ourModel.Draw(ourShader);
+
+		ourShader.Unbind();
 
 		ui.Draw(IMGUI_WIDTH, IMGUI_HEIGHT);
 		/* Swap front and back buffers */
@@ -246,7 +251,7 @@ int main(void)
 		glfwPollEvents();
 	}
 
-	//ui.~OpenglImgui();
+	ui.~OpenglImgui();
 
 	glfwDestroyWindow(window);
 
