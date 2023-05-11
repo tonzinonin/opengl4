@@ -52,7 +52,7 @@ struct PointLight {
     float quadratic;
 };
 
-#define NR_POINT_LIGHTS 4
+#define NR_POINT_LIGHTS 1
 
 uniform PointLight pointlight[NR_POINT_LIGHTS];
 uniform DirLight dirlight;
@@ -122,12 +122,12 @@ vec3 CalculateSpotLight(SpotLight light , vec3 normal , vec3 viewDir , vec3 Frag
     return ambient + diffuse + specular;
 }
 void main()
-{
+{    
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 norm = normalize(Normal);//法向量的单位向量
     vec3 output;
     output += CalculateDirectionalLight(dirlight , norm , viewDir);
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 1; i++)
     {
         output += CalculatePointLight(pointlight[i] , norm , viewDir , FragPos);
     }

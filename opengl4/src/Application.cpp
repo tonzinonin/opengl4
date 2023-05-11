@@ -16,6 +16,7 @@
 #include "Camera.h"
 #include "ReadVertex.h"
 #include "openglui.h"	
+#include "Model.h"
 
 #include "stb_image/stb_image.h"
 
@@ -51,11 +52,11 @@ int main(void)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH,SCREEN_HEIGHT , "cube", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "cube", nullptr, nullptr);
 	if (!window)
 	{
 		GLCall(glfwTerminate())
-		return -1;
+			return -1;
 	}
 
 	/* Make the window's context current */
@@ -66,10 +67,21 @@ int main(void)
 		std::cout << "Error!" << std::endl;
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetKeyCallback(window, key_callback);
+
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//GLCall(glEnable(GL_BLEND))
+	//GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))//开启混合
+	glEnable(GL_DEPTH_TEST);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	stbi_set_flip_vertically_on_load(true);
+
 	VertexUnion vu("res/vertex/cubeVertex.txt");
 	vu.value(positions);
 
-	glm::vec3 cubePositions[] ={
+	glm::vec3 cubePositions[] = {
 		glm::vec3(0.0f,  0.0f,  0.0f),
 		glm::vec3(2.0f,  5.0f, -15.0f),
 		glm::vec3(-1.5f, -2.2f, -2.5f),
@@ -88,13 +100,15 @@ int main(void)
 		glm::vec3(-4.0f,  2.0f, -12.0f),
 		glm::vec3(0.0f,  0.0f, -3.0f)
 	};
+	Shader ourShader("res/shader/ourShader.vert" , "res/shader/ourShader.frag");
+	Model ourModel("res/model/nanosuit.mtl");
 
 	unsigned int vao;
 	GLCall(glGenVertexArrays(1, &vao))
-	GLCall(glBindVertexArray(vao))
+		GLCall(glBindVertexArray(vao))
 
-	//std::cout << " ! " <<  vu.GetCount() << std::endl;
-	VertexArray va;
+		//std::cout << " ! " <<  vu.GetCount() << std::endl;
+		VertexArray va;
 	VertexBuffer vb(positions, vu.GetCount() * sizeof(float));
 
 	VertexBufferLayout layout;
@@ -103,11 +117,11 @@ int main(void)
 	layout.Push<float>(2);
 	va.AddBuffer(vb, layout);
 
-	Shader shader("res/shader/Object.vert" , "res/shader/Object.frag");
+	Shader shader("res/shader/Object.vert", "res/shader/Object.frag");
 	shader.Bind();
-	
+
 	shader.SetUniform1f("material.shininess", 32.0f);
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		std::string str = "pointlight[";
 		char idx = i + '0';
@@ -160,7 +174,7 @@ int main(void)
 	//shader.SetUniform1i("material.glow", 2);
 	shader.Unbind();
 
-	Shader lightShader("res/shader/Light.vert" , "res/shader/Light.frag");
+	Shader lightShader("res/shader/Light.vert", "res/shader/Light.frag");
 	lightShader.Bind();
 	lightShader.SetUniformMat4f("scale",
 		glm::mat4(
@@ -175,17 +189,8 @@ int main(void)
 
 	OpenglImgui ui(window, shader, camera, cubePositions, 10);
 
-	Renderer renderer(camera , ui , va , texture0);
+	Renderer renderer(camera, ui, va, texture0);
 
-	glfwSetCursorPosCallback(window, mouse_callback);
-	glfwSetScrollCallback(window, scroll_callback);
-	glfwSetKeyCallback(window, key_callback);
-
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	//GLCall(glEnable(GL_BLEND))
-	//GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))//开启混合
-	glEnable(GL_DEPTH_TEST);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -195,6 +200,8 @@ int main(void)
 		deltaTime = timeValue - lastFrame;
 		lastFrame = timeValue;
 
+		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		texture0.Bind(0);
 		texture1.Bind(1);
 		//texture2.Bind(2);
@@ -202,8 +209,9 @@ int main(void)
 		renderer.Clear();
 		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, shader);
 		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, lightShader);
+		//renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, ourShader);
 
-		shader.Bind();  
+		shader.Bind();
 		//shader.SetUniform1f("movement", timeValue);
 		shader.SetUniformVec3("spotlight.direction", camera.cameraFront.x, camera.cameraFront.y, camera.cameraFront.z);
 		shader.SetUniformVec3("viewPos", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
@@ -212,13 +220,25 @@ int main(void)
 
 		//renderer.Mix(false, mixValue, shader );
 		//renderer.DrawCube(va, shader, texture0 , texture1 , cubePositions , ui , rendererNumber );
-		
-		renderer.Cube(shader, cubePositions ,10);
+
+		renderer.Cube(shader, cubePositions, 10);
 		renderer.isMove = true;
-		renderer.Cube(lightShader, lightPositions , 4);
+		renderer.Cube(lightShader, lightPositions, 1);
 		renderer.isMove = false;
 
-		ui.Draw(IMGUI_WIDTH , IMGUI_HEIGHT);
+		ourShader.Bind();
+		glm::mat4 projection = glm::perspective(glm::radians(camera.fov), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 view = camera.GetViewMatrix();
+		ourShader.SetUniformMat4f("projection", projection);
+		ourShader.SetUniformMat4f("view", view);
+
+		// render the loaded model
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+		ourModel.Draw(ourShader);
+
+		ui.Draw(IMGUI_WIDTH, IMGUI_HEIGHT);
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
 
@@ -226,7 +246,7 @@ int main(void)
 		glfwPollEvents();
 	}
 
-	ui.~OpenglImgui();
+	//ui.~OpenglImgui();
 
 	glfwDestroyWindow(window);
 
@@ -237,7 +257,7 @@ void processInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
-		glfwDestroyWindow(window); 
+		glfwDestroyWindow(window);
 		glfwTerminate();
 	}
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
@@ -249,16 +269,16 @@ void processInput(GLFWwindow* window)
 	{
 		mixValue -= 0.01;
 		if (mixValue <= 0.00) mixValue = 0.00;
-	}		
+	}
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) camera.PositionMovement(deltaTime, FORWARD);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) camera.PositionMovement(deltaTime, BACKWARD);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camera.PositionMovement(deltaTime, RIGHT);
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camera.PositionMovement(deltaTime, LEFT);
 }
 
-void mouse_callback(GLFWwindow* window, double xpos, double ypos){ camera.LookMovement(xpos, ypos); }
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) { camera.LookMovement(xpos, ypos); }
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){ camera.ScrollMovement(xoffset, yoffset); }
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) { camera.ScrollMovement(xoffset, yoffset); }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -266,7 +286,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 		if (isMouse == false)
 		{
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); 
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			glfwSetCursorPosCallback(window, NULL);
 			isMouse = true;
 			std::cout << '!' << std::endl;

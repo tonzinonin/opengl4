@@ -12,13 +12,13 @@ void Renderer::Clear() const
 void Renderer::MVPTrans(const unsigned int SCREEN_WIDTH, const unsigned int SCREEN_HEIGHT, const Shader& shader) const
 {
 	shader.Bind();
-	glm::mat4 diy = 
-		glm::mat4(
-		glm::vec4(1, 0, 0, 0),
-		glm::vec4(0, 1, 0, 0),
-		glm::vec4(0, 0, 1, 0),
-		glm::vec4(0, 0, 0, 1.0)
-	);
+	//glm::mat4 diy = 
+	//	glm::mat4(
+	//	glm::vec4(1, 0, 0, 0),
+	//	glm::vec4(0, 1, 0, 0),
+	//	glm::vec4(0, 0, 1, 0),
+	//	glm::vec4(0, 0, 0, 1.0)
+	//);
 	float radius = 10.0f;
 	float camX = sin(glfwGetTime()) * radius;
 	float camZ = cos(glfwGetTime()) * radius;
@@ -31,6 +31,7 @@ void Renderer::MVPTrans(const unsigned int SCREEN_WIDTH, const unsigned int SCRE
 
 	shader.SetUniformMat4f("projection", projection);
 	shader.SetUniformMat4f("view", view);
+
 	shader.Unbind();
 }
 void Renderer::Mix(const int& isAddColor, const float& input, const Shader& shader ) const

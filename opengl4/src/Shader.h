@@ -36,6 +36,8 @@ public:
 	void SetUniform1f(const std::string& name, float value) const;
 	void SetUniformMat4f(const std::string& name, const glm::mat4& matrix) const;
 
+	inline unsigned int GetRendererID() { return this -> m_RendererID; }
+
 private:
 	unsigned int GetUniformLocation(const std::string& name) const;
 	ShaderProgramSource ParseShader(const std::string& filepath, const std::string& filepath2) const;

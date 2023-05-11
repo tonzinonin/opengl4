@@ -66,7 +66,10 @@
     <ClCompile Include="src\FaultChecking.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Light.cpp">
+    <ClCompile Include="src\Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -76,6 +79,8 @@
     <None Include="res\shader\Light.vert" />
     <None Include="res\shader\Object.vert" />
     <None Include="res\shader\Light.frag" />
+    <None Include="res\shader\ourShader.frag" />
+    <None Include="res\shader\ourShader.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer.h">
@@ -141,7 +146,10 @@
     <ClInclude Include="src\FaultChecking.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Light.h">
+    <ClInclude Include="src\Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
