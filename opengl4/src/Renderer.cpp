@@ -19,12 +19,8 @@ void Renderer::MVPTrans(const unsigned int SCREEN_WIDTH, const unsigned int SCRE
 	//	glm::vec4(0, 0, 1, 0),
 	//	glm::vec4(0, 0, 0, 1.0)
 	//);
-	float radius = 10.0f;
-	float camX = sin(glfwGetTime()) * radius;
-	float camZ = cos(glfwGetTime()) * radius;
 	glm::mat4 view = camera.GetViewMatrix();
-	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(camera.fov), float(SCREEN_WIDTH) / float(SCREEN_HEIGHT), 0.1f, 100.0f); 
+	glm::mat4 projection = glm::perspective(glm::radians(camera.fov), float(SCREEN_WIDTH) / float(SCREEN_HEIGHT), 0.1f, 100.0f);
 
 	ui.projectionupdate(projection);
 	ui.viewupdate(view);
@@ -32,7 +28,6 @@ void Renderer::MVPTrans(const unsigned int SCREEN_WIDTH, const unsigned int SCRE
 	shader.SetUniformMat4f("projection", projection);
 	shader.SetUniformMat4f("view", view);
 
-	shader.Unbind();
 }
 void Renderer::Mix(const int& isAddColor, const float& input, const Shader& shader ) const
 {
@@ -64,7 +59,7 @@ void Renderer::Draw(const Shader& shader, const Texture& texture0, const Texture
 
 	GLCall(glDrawElements(GL_TRIANGLES, id.GetCount(), GL_UNSIGNED_INT, nullptr));	
 	
-	shader.Unbind();
+	//shader.Unbind();
 	va.Unbind();
 	id.Unbind();
 }
@@ -90,6 +85,6 @@ void Renderer::Cube(const Shader& shader, const glm::vec3* cubePositions ,const 
 		GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
 	}
 
-	shader.Unbind();
+	//shader.Unbind();
 	va.Unbind();
 }

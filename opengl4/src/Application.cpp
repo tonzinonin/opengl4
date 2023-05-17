@@ -78,7 +78,7 @@ int main(void)
 	//GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))//¿ªÆô»ìºÏ
 	glEnable(GL_DEPTH_TEST);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	stbi_set_flip_vertically_on_load(true);
+	stbi_set_flip_vertically_on_load(false);
 
 	VertexUnion vu("res/vertex/cubeVertex.txt");
 	vu.value(positions);
@@ -102,7 +102,7 @@ int main(void)
 		glm::vec3(-4.0f,  2.0f, -12.0f),
 		glm::vec3(0.0f,  0.0f, -3.0f)
 	};
-	Shader ourShader("res/shader/ourShader.vert" , "res/shader/ourShader.frag");
+	Shader shader("res/shader/ourShader.vert" , "res/shader/ourShader.frag");
 	Model ourModel("res/model/nanosuit.obj");
 
 	unsigned int vao;
@@ -119,10 +119,10 @@ int main(void)
 	layout.Push<float>(2);
 	va.AddBuffer(vb, layout);
 
-	Shader shader("res/shader/Object.vert", "res/shader/Object.frag");
+	//Shader shader("res/shader/Object.vert", "res/shader/Object.frag");
 	shader.Bind();
 
-	shader.SetUniform1f("material.shininess", 32.0f);
+	shader.SetUniform1f("shininess", 32.0f);
 	for (int i = 0; i < 1; i++)
 	{
 		std::string str = "pointlight[";
@@ -165,15 +165,15 @@ int main(void)
 
 	shader.SetUniform1f("spotlight.cutOff", glm::cos(glm::radians(12.5f)));
 	shader.SetUniform1f("spotlight.outerCutOff", glm::cos(glm::radians(15.5f)));
-	//shader.SetUniformVec3("light.direction", -0.2f, -1.0f, -0.3f);
+
+
+	//shader.Unbind();
 
 	Texture texture0("res/textures/container2.png");
 	Texture texture1("res/textures/container2_specular.png");
 	//Texture texture2("res/textures/matrix.jpg");
-
-	shader.SetUniform1i("material.diffuse", 0);
-	shader.SetUniform1i("material.specular", 1);
 	//shader.SetUniform1i("material.glow", 2);
+
 	shader.Unbind();
 
 	Shader lightShader("res/shader/Light.vert", "res/shader/Light.frag");
@@ -204,46 +204,47 @@ int main(void)
 
 		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		texture0.Bind(0);
-		texture1.Bind(1);
+		//texture0.Bind(0);
+		//texture1.Bind(1);
 		//texture2.Bind(2);
 
-		renderer.Clear();
+		//renderer.Clear();
 		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, shader);
-		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, lightShader);
+		//renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, lightShader);
 		//renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, ourShader);
 
-		shader.Bind();
-		//shader.SetUniform1f("movement", timeValue);
-		shader.SetUniformVec3("spotlight.direction", camera.cameraFront.x, camera.cameraFront.y, camera.cameraFront.z);
-		shader.SetUniformVec3("viewPos", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
-		shader.SetUniformVec3("spotlight.position", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
-		shader.Unbind();
+		//shader.Bind();
+		////shader.SetUniform1f("movement", timeValue);
+		//shader.Unbind();
 
 		//renderer.Mix(false, mixValue, shader );
 		//renderer.DrawCube(va, shader, texture0 , texture1 , cubePositions , ui , rendererNumber );
 
-		renderer.Cube(shader, cubePositions, 2);
-		renderer.isMove = true;
-		renderer.Cube(lightShader, lightPositions, 1);
-		renderer.isMove = false;
+		//renderer.isMove = true;
+		//renderer.Cube(lightShader, lightPositions, 1);
+		//renderer.isMove = false;
 
-		ourShader.Bind();
-		glm::mat4 projection = glm::perspective(glm::radians(camera.fov), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
-		glm::mat4 view = camera.GetViewMatrix();
-		ourShader.SetUniformMat4f("projection", projection);
-		ourShader.SetUniformMat4f("view", view);
+		shader.Bind();
 
-		// render the loaded model
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
-		ourShader.SetUniformMat4f("model", model);
-		ourModel.Draw(ourShader);
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
+		shader.SetUniformMat4f("model", model);
 
-		ourShader.Unbind();
+		shader.SetUniformVec3("spotlight.direction", camera.cameraFront.x, camera.cameraFront.y, camera.cameraFront.z);
+		shader.SetUniformVec3("viewPos", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
+		shader.SetUniformVec3("spotlight.position", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
 
-		ui.Draw(IMGUI_WIDTH, IMGUI_HEIGHT);
+		ourModel.Draw(shader);
+		texture0.Bind(0);
+		texture1.Bind(1);
+		//texture2.Bind(2);
+		renderer.Cube(shader, cubePositions, 10);
+
+		//shader.Unbind();
+		//ourShader.Unbind();
+
+		//ui.Draw(IMGUI_WIDTH, IMGUI_HEIGHT);
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
 
@@ -251,7 +252,7 @@ int main(void)
 		glfwPollEvents();
 	}
 
-	ui.~OpenglImgui();
+	//ui.~OpenglImgui();
 
 	glfwDestroyWindow(window);
 
