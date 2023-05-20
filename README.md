@@ -1,1 +1,1 @@
-# opengl4
+# learn-opengl project
