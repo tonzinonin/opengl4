@@ -82,7 +82,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GLEW_STATIC;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_STATIC;WIN32;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\ASSIMP\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\GLFW\include</AdditionalIncludeDirectories>
@@ -101,7 +101,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GLEW_STATIC;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_STATIC;WIN32;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\ASSIMP\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\GLFW\include</AdditionalIncludeDirectories>
@@ -172,6 +172,8 @@
     <None Include="res\shader\Object.vert" />
     <None Include="res\shader\ourShader.frag" />
     <None Include="res\shader\ourShader.vert" />
+    <None Include="res\shader\skybox.frag" />
+    <None Include="res\shader\skybox.vert" />
     <None Include="res\shader\test.frag" />
   </ItemGroup>
   <ItemGroup>
@@ -202,10 +204,17 @@
   <ItemGroup>
     <Text Include="res\vertex\cubeVertex.txt" />
     <Text Include="res\vertex\Light.txt" />
+    <Text Include="res\vertex\skybox.txt" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\textures\container2.png" />
     <Image Include="res\textures\container2_specular.png" />
+    <Image Include="res\textures\SkyBox\back.jpg" />
+    <Image Include="res\textures\SkyBox\bottom.jpg" />
+    <Image Include="res\textures\SkyBox\front.jpg" />
+    <Image Include="res\textures\SkyBox\left.jpg" />
+    <Image Include="res\textures\SkyBox\right.jpg" />
+    <Image Include="res\textures\SkyBox\top.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

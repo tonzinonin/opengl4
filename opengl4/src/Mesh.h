@@ -45,7 +45,7 @@ public:
 
         setupMesh();
     }
-    void Draw(Shader shader)
+    void Draw(Shader &shader)
     {
         unsigned int diffuseNr = 1;
         unsigned int specularNr = 1;
@@ -65,8 +65,8 @@ public:
                 number = std::to_string(normalNr++); // transfer unsigned int to string
             else if (name == "texture_height")
                 number = std::to_string(heightNr++); // transfer unsigned int to string
-
-            shader.SetUniform1i((name + number).c_str(), i);
+            //shader.SetUniform1i((name + number).c_str(), i);
+            glUniform1i(glGetUniformLocation(shader.GetRendererID(), (name + number).c_str()),i);
             glBindTexture(GL_TEXTURE_2D, textures[i].id);
         }
 

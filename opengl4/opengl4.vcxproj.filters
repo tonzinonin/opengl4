@@ -79,6 +79,8 @@
     <None Include="res\shader\ourShader.frag" />
     <None Include="res\shader\ourShader.vert" />
     <None Include="res\shader\test.frag" />
+    <None Include="res\shader\skybox.vert" />
+    <None Include="res\shader\skybox.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer.h">
@@ -154,12 +156,31 @@
   <ItemGroup>
     <Text Include="res\vertex\Light.txt" />
     <Text Include="res\vertex\cubeVertex.txt" />
+    <Text Include="res\vertex\skybox.txt" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\textures\container2.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\textures\container2_specular.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\textures\SkyBox\back.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\textures\SkyBox\bottom.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\textures\SkyBox\front.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\textures\SkyBox\left.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\textures\SkyBox\right.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\textures\SkyBox\top.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

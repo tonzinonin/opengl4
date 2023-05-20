@@ -5,7 +5,7 @@
 
 void Renderer::Clear() const
 {
-	//glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
@@ -19,6 +19,10 @@ void Renderer::MVPTrans(const unsigned int SCREEN_WIDTH, const unsigned int SCRE
 	//	glm::vec4(0, 0, 1, 0),
 	//	glm::vec4(0, 0, 0, 1.0)
 	//);
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+	model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
+	shader.SetUniformMat4f("model", model);
 	glm::mat4 view = camera.GetViewMatrix();
 	glm::mat4 projection = glm::perspective(glm::radians(camera.fov), float(SCREEN_WIDTH) / float(SCREEN_HEIGHT), 0.1f, 100.0f);
 
@@ -27,6 +31,8 @@ void Renderer::MVPTrans(const unsigned int SCREEN_WIDTH, const unsigned int SCRE
 
 	shader.SetUniformMat4f("projection", projection);
 	shader.SetUniformMat4f("view", view);
+
+	shader.Unbind();
 
 }
 void Renderer::Mix(const int& isAddColor, const float& input, const Shader& shader ) const
@@ -85,6 +91,6 @@ void Renderer::Cube(const Shader& shader, const glm::vec3* cubePositions ,const 
 		GLCall(glDrawArrays(GL_TRIANGLES, 0, 36));
 	}
 
-	//shader.Unbind();
+	shader.Unbind();
 	va.Unbind();
 }

@@ -1,7 +1,4 @@
-
-
 #include <iostream>
-//#include "GLAD/glad.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <fstream>
@@ -42,86 +39,46 @@ float lastFrame = 0.0f; // 上一帧的时间
 bool isMouse = false;
 float SpecularSt = 0.5;
 float positions[ARR_SIZE];
+float lightboxposition[ARR_SIZE];
 
 Camera camera;
 
-int main(void)
+unsigned int LoadCubeTexture(std::vector<std::string> faces)
 {
-	if (!glfwInit())
-		return -1;
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "cube", nullptr, nullptr);
-	if (!window)
+	int width, height, nrChannels;
+	unsigned char* data;
+	for (unsigned int i = 0; i < faces.size(); i++)
 	{
-		GLCall(glfwTerminate())
-			return -1;
+		data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+			);
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+			stbi_image_free(data);
+		}
 	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-	/* Make the window's context current */
-	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1);
+	return textureID;
+}
 
-	if (glewInit() != GLEW_OK)
-		std::cout << "Error!" << std::endl;
-	std::cout << glGetString(GL_VERSION) << std::endl;
-
-	glfwSetCursorPosCallback(window, mouse_callback);
-	glfwSetScrollCallback(window, scroll_callback);
-	glfwSetKeyCallback(window, key_callback);
-
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	//GLCall(glEnable(GL_BLEND))
-	//GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))//开启混合
-	glEnable(GL_DEPTH_TEST);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	stbi_set_flip_vertically_on_load(false);
-
-	VertexUnion vu("res/vertex/cubeVertex.txt");
-	vu.value(positions);
-
-	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f,  0.0f,  0.0f),
-		glm::vec3(2.0f,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(2.4f, -0.4f, -3.5f),
-		glm::vec3(-1.7f,  3.0f, -7.5f),
-		glm::vec3(1.3f, -2.0f, -2.5f),
-		glm::vec3(1.5f,  2.0f, -2.5f),
-		glm::vec3(1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
-	};
-
-	glm::vec3 lightPositions[] = {
-		glm::vec3(0.7f,  0.2f,  2.0f),
-		glm::vec3(2.3f, -3.3f, -4.0f),
-		glm::vec3(-4.0f,  2.0f, -12.0f),
-		glm::vec3(0.0f,  0.0f, -3.0f)
-	};
-	Shader shader("res/shader/ourShader.vert" , "res/shader/ourShader.frag");
-	Model ourModel("res/model/nanosuit.obj");
-
-	unsigned int vao;
-	GLCall(glGenVertexArrays(1, &vao))
-		GLCall(glBindVertexArray(vao))
-
-		//std::cout << " ! " <<  vu.GetCount() << std::endl;
-		VertexArray va;
-	VertexBuffer vb(positions, vu.GetCount() * sizeof(float));
-
-	VertexBufferLayout layout;
-	layout.Push<float>(3);
-	layout.Push<float>(3);
-	layout.Push<float>(2);
-	va.AddBuffer(vb, layout);
-
-	//Shader shader("res/shader/Object.vert", "res/shader/Object.frag");
+void LoadBasicShader(glm::vec3 *lightPositions, Shader& shader)
+{
 	shader.Bind();
-
 	shader.SetUniform1f("shininess", 32.0f);
 	for (int i = 0; i < 1; i++)
 	{
@@ -167,16 +124,104 @@ int main(void)
 	shader.SetUniform1f("spotlight.outerCutOff", glm::cos(glm::radians(15.5f)));
 
 
-	//shader.Unbind();
-
-	Texture texture0("res/textures/container2.png");
-	Texture texture1("res/textures/container2_specular.png");
-	//Texture texture2("res/textures/matrix.jpg");
-	//shader.SetUniform1i("material.glow", 2);
-
 	shader.Unbind();
+}
 
+int main(void)
+{
+	if (!glfwInit())
+		return -1;
+
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "cube", nullptr, nullptr);
+	if (!window)
+	{
+		GLCall(glfwTerminate())
+			return -1;
+	}
+
+	/* Make the window's context current */
+	glfwMakeContextCurrent(window);
+	glfwSwapInterval(1);
+
+	if (glewInit() != GLEW_OK)
+		std::cout << "Error!" << std::endl;
+	std::cout << glGetString(GL_VERSION) << std::endl;
+
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetKeyCallback(window, key_callback);
+
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//GLCall(glEnable(GL_BLEND))
+	//GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))//开启混合
+	glEnable(GL_DEPTH_TEST);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	stbi_set_flip_vertically_on_load(false);
+
+	VertexUnion vu("res/vertex/cubeVertex.txt");
+	vu.value(positions);
+	VertexUnion skybox("res/vertex/skybox.txt");
+	skybox.value(lightboxposition);
+
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
+		glm::vec3(1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
+
+	glm::vec3 lightPositions[] = {
+		glm::vec3(0.7f,  0.2f,  2.0f),
+		glm::vec3(2.3f, -3.3f, -4.0f),
+		glm::vec3(-4.0f,  2.0f, -12.0f),
+		glm::vec3(0.0f,  0.0f, -3.0f)
+	};
+
+	std::vector<std::string> faces
+	{
+		"res/textures/SkyBox/right.jpg",
+		"res/textures/SkyBox/left.jpg",
+		"res/textures/SkyBox/top.jpg",
+		"res/textures/SkyBox/bottom.jpg",
+		"res/textures/SkyBox/front.jpg",
+		"res/textures/SkyBox/back.jpg"
+	};
+
+	//-----
+	unsigned int cubemapTexture = LoadCubeTexture(faces);
+	std::cout << "count : " <<  skybox.GetCount() << std::endl;
+	VertexArray skyboxVAO;
+	VertexBuffer skyboxvb(lightboxposition, skybox.GetCount() * sizeof(float));
+	VertexBufferLayout skylayout;
+	skylayout.Push<float>(3);
+	skyboxVAO.AddBuffer(skyboxvb, skylayout);
+
+	VertexArray va;
+	VertexBuffer vb(positions, vu.GetCount() * sizeof(float));
+	VertexBufferLayout layout;
+	layout.Push<float>(3);
+	layout.Push<float>(3);
+	layout.Push<float>(2);
+	va.AddBuffer(vb, layout);
+
+	Model ourModel("res/model/nanosuit.obj");//加载obj模型
+
+	Shader shader("res/shader/ourShader.vert", "res/shader/ourShader.frag");
 	Shader lightShader("res/shader/Light.vert", "res/shader/Light.frag");
+	Shader skyShader("res/shader/skybox.vert", "res/shader/skybox.frag");
+
+	LoadBasicShader(lightPositions , shader);//加载基础受光物体的shader
+
 	lightShader.Bind();
 	lightShader.SetUniformMat4f("scale",
 		glm::mat4(
@@ -185,7 +230,14 @@ int main(void)
 			0, 0, 0.3, 0,
 			0, 0, 0, 1
 		));
-	lightShader.Unbind();
+	std::cout << "lightShaderID:" << lightShader.GetRendererID() << std::endl;
+	lightShader.Unbind();//加载点光源shader
+
+	Texture texture0("res/textures/container2.png");
+	Texture texture1("res/textures/container2_specular.png");
+	//Texture texture2("res/textures/matrix.jpg");
+	//shader.SetUniform1i("material.glow", 2);//加载cube基础贴图
+
 	va.Unbind();
 	vb.Unbind();
 
@@ -202,38 +254,33 @@ int main(void)
 		deltaTime = timeValue - lastFrame;
 		lastFrame = timeValue;
 
-		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//texture0.Bind(0);
-		//texture1.Bind(1);
+		renderer.Clear();
 		//texture2.Bind(2);
 
-		//renderer.Clear();
+		glDepthMask(GL_FALSE);
+		skyShader.Bind();
+		skyboxVAO.Bind();
+		glm::mat4 projection = glm::perspective(glm::radians(camera.fov), float(SCREEN_WIDTH) / float(SCREEN_HEIGHT), 0.1f, 100.0f);
+		//skyShader.SetUniformMat4f("projection", projection);
+		glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+		glUniformMatrix4fv(glGetUniformLocation(skyShader.GetRendererID(), "view"), 1, GL_FALSE, &view[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(skyShader.GetRendererID(), "projection"), 1, GL_FALSE, &projection[0][0]);
+
+		//shader.SetUniformMat4f("view", camera.GetViewMatrix());
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDepthMask(GL_TRUE);
+
 		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, shader);
-		//renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, lightShader);
-		//renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, ourShader);
-
-		//shader.Bind();
-		////shader.SetUniform1f("movement", timeValue);
-		//shader.Unbind();
-
-		//renderer.Mix(false, mixValue, shader );
-		//renderer.DrawCube(va, shader, texture0 , texture1 , cubePositions , ui , rendererNumber );
-
-		//renderer.isMove = true;
-		//renderer.Cube(lightShader, lightPositions, 1);
-		//renderer.isMove = false;
+		renderer.MVPTrans(SCREEN_WIDTH, SCREEN_WIDTH, lightShader);
+		renderer.Cube(lightShader, lightPositions, 2);
+		skyShader.Unbind();
+		skyboxVAO.Unbind();
 
 		shader.Bind();
-
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
-		shader.SetUniformMat4f("model", model);
-
-		shader.SetUniformVec3("spotlight.direction", camera.cameraFront.x, camera.cameraFront.y, camera.cameraFront.z);
-		shader.SetUniformVec3("viewPos", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
-		shader.SetUniformVec3("spotlight.position", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
+		glUniform3f(glGetUniformLocation(shader.GetRendererID(), "spotlight.direction"), camera.cameraFront.x, camera.cameraFront.y, camera.cameraFront.z);
+		glUniform3f(glGetUniformLocation(shader.GetRendererID(), "viewPos"), camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
+		glUniform3f(glGetUniformLocation(shader.GetRendererID(), "spotlight.position"), camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
 
 		ourModel.Draw(shader);
 		texture0.Bind(0);

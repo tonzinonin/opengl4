@@ -36,10 +36,10 @@ public:
 	void SetUniform1f(const std::string& name, float value) const;
 	void SetUniformMat4f(const std::string& name, const glm::mat4& matrix) const;
 
-	inline unsigned int GetRendererID() { return this -> m_RendererID; }
+	unsigned int GetRendererID() const { return this->m_RendererID; }
 
 private:
-	unsigned int GetUniformLocation(const std::string& name) const;
+	unsigned int GetUniformLocation(const std::string name) const;
 	ShaderProgramSource ParseShader(const std::string& filepath, const std::string& filepath2) const;
 	unsigned int CompileShader(unsigned int type, const std::string& source); 
 	unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
